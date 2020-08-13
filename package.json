@@ -1,0 +1,38 @@
+{
+  "name": "for-o-fourgh",
+  "version": "1.0.0",
+  "description": "For O'Fourgh",
+  "main": "index.html",
+  "scripts": {
+    "clean": "rm -rf build dist",
+    "watch": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"gulp build-dev\" \"gulp --silent watch\"",
+    "build": "gulp build-dev",
+    "prod": "gulp build-prod",
+    "gulp": "gulp",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lopis/for-o-fourgh"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/parser": "^7.11.3",
+    "@babel/types": "^7.11.0",
+    "concurrently": "^5.3.0",
+    "eval": "^0.1.4",
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^3.1.0",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-inject": "^5.0.5",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-uglify-es": "^2.0.0",
+    "gulp-watch": "^5.0.1",
+    "gulp-zip": "^5.0.2",
+    "mkdirp": "^1.0.4",
+    "typescript": "^3.9.7"
+  }
+}
