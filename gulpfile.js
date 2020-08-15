@@ -50,22 +50,18 @@ gulp.task('build-js', (done) => {
 	.pipe(concat('main.js'))
 	.pipe(uglify({
     mangle: {
-      toplevel: true,
-      reserved: ['resetData']
+      toplevel: true
     },
   }))
 	.pipe(gulp.dest('./build/'));
 });
 
 gulp.task('build-ts', function () {
-    return gulp.src('./src/ts/*.ts')
-	.pipe(ts({
-		// noImplicitAny: true,
-		outFile: 'main.js',
-    removeComments: true,
-    target: "es2015",
-	}))
-	.pipe(gulp.dest('build'));
+  var tsProject = ts.createProject('tsconfig.json');
+
+  return gulp.src('./src/ts/*.ts')
+    .pipe(tsProject())
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('build-html', (done) => {
@@ -135,11 +131,11 @@ gulp.task('build-prod', gulp.series(
 ));
 gulp.task('build-dev', gulp.series(
 	'build-html',
-	'build-ts',
-  'build-css',
-  'inject-css',
-	'build-js',
-	'check',
+	// 'build-ts',
+  // 'build-css',
+  // 'inject-css',
+	// 'build-js',
+	// 'check',
 	'build-ts',
 	'build-js-dev',
   'build-css',

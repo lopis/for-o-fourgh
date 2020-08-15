@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "clean": "rm -rf build dist",
-    "watch": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"gulp build-dev\" \"gulp --silent watch\"",
+    "dev": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"gulp build-dev\" \"gulp --silent watch\"",
     "build": "gulp build-dev",
     "prod": "gulp build-prod",
     "gulp": "gulp",

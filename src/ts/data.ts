@@ -1,0 +1,1 @@
+const players: Player[] = []

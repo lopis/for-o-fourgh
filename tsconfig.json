@@ -1,0 +1,14 @@
+{
+  "exclude": [
+      "node_modules",
+      "build",
+      "dist"
+  ],
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "outFile": "main.js",
+    "module": "none",
+    "removeComments": true,
+    "target": "es6",
+  },
+}

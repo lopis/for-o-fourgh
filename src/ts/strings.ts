@@ -1,0 +1,5 @@
+const BANK = 'bank'
+const COURT = 'court'
+const TEMPLE = 'temple'
+const EDEN = 'eden'
+const HELL = 'hell'
