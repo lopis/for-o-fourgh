@@ -79,7 +79,7 @@ const mainLoop = () => {
   promptNextLocation()
   .then(waitForPlayersLocation)
   .then(animatePlayers)
-  // .then(displayActions)
+  .then(displayActions)
   // .then(promptForAction)
   // .then(waitForPlayersActions)
   // .then(applyActionEffects)

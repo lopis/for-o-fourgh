@@ -10,6 +10,89 @@ const locations: GameLocation[] = [
   HELL,
 ].map((name: LocationName) => ({name: name, players: []}))
 
+const options = {
+  bank: [{
+    name: 'Interest Return',
+    labels: [
+      ['💰', '💰 + 💰 / 5 ⚜️']
+    ],
+    effect: (player: Player) => {
+      // Get 1 Gold + 1 Gold per each 5 Influence
+      player.gold += 1 + Math.floor(player.influence / 5)
+    }
+  }],
+
+  court: [
+    {
+      name: 'Draw Policy',
+      labels: [
+        ['⚖️', 'draw 1']
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player drew a policy card');
+      }
+    },
+    {
+      name: 'Embezzlement',
+      labels: [
+        ['🏺', '+1'],
+        ['💰', '-2'],
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player gets 1 relic');
+      }
+    }
+  ],
+
+  temple: [
+    {
+      name: 'Offering',
+      labels: [
+        ['🏺', '-1'],
+        ['⚜️', '+3'],
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player offers 1 relic for 3 influence');
+      }
+    },
+    {
+      name: 'Donation',
+      labels: [
+        ['💰', '-1'],
+        ['⚜️', '+1'],
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player donates 1 gold for 1 influence');
+      }
+    }
+  ],
+
+  eden: [
+    {
+      name: 'Blessing',
+      labels: [
+        ['🧿', 'draw 1']
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player draws a blessing card');
+      }
+    }
+  ],
+
+  hell: [
+    {
+      name: 'Wrath',
+      labels: [
+        ['🌩', 'draw 1']
+      ],
+      effect: (player: Player) => {
+        console.log('not implemented', 'player draws a damnation card');
+      }
+    }
+  ],
+
+}
+
 
 function updatePlayerLocation (resolve : Function) {
   players.forEach(player => {

@@ -1,0 +1,56 @@
+.decks {
+	position: absolute;
+	top: calc(var(--pixel-size) * 7);
+	display: flex;
+}
+
+.deck {
+  counter-reset: deck;
+	margin: calc(var(--pixel-size) * 2);
+}
+
+.card {
+  counter-increment: deck;
+	height: calc(var(--pixel-size) * 20);
+  width: calc(var(--pixel-size) * 12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: var(--pixel-size) solid rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  position: relative;
+  margin-bottom: calc((var(--pixel-size) * -19.5));
+}
+
+.card:nth-child(2n) {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.card:nth-child(2) { margin-left: calc((var(--pixel-size) * 0.5));}
+.card:nth-child(3) { margin-left: calc((var(--pixel-size) * 1.0));}
+.card:nth-child(4) { margin-left: calc((var(--pixel-size) * 1.5));}
+.card:nth-child(5) { margin-left: calc((var(--pixel-size) * 2.0));}
+.card:nth-child(n+6) {
+  margin-left: calc((var(--pixel-size) * 2.5));
+  margin-bottom: calc(var(--pixel-size) * -20);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.card::before {
+  content: attr(data-symbol);
+	font-size: 8vh;
+}
+
+.policies .card {
+  background: #fff8e3;
+}
+
+.blessings .card {
+  background: #ffe489;
+}
+
+.damnations .card {
+  background: #da7474;
+}
+
+

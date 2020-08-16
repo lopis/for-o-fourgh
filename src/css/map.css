@@ -7,7 +7,7 @@
   image-rendering: pixelated;
   image-rendering: optimizespeed;
   position: relative;
-  margin: auto;
+  margin: auto 5% auto auto;
   border: var(--pixel-size) solid #c4bfb0;
 }
 
@@ -15,17 +15,17 @@
 	content: "";
 	border: var(--pixel-size) solid #c4bfb0;
 	position: absolute;
-	left: -20px;
-	width: calc(100% + 20px);
-	height: calc(100% - 20px);
+	left: calc(var(--pixel-size) * -2);
+	width: calc(100% + 2 * var(--pixel-size));
+	height: calc(100% - 2 * var(--pixel-size));
 	z-index: -1;
 }
 
 .map::after {
-	width: calc(100% - 20px);
-  height: calc(100% + 20px);
+	width: calc(100% - 2 * var(--pixel-size));
+  height: calc(100% + 2 * var(--pixel-size));
   left: 0;
-  top: -20px;
+  top: calc(var(--pixel-size) * -2);
 }
 
 @keyframes map {
