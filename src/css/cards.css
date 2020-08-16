@@ -5,7 +5,8 @@
 }
 
 .deck {
-	margin: calc(var(--pixel-size) * 2);
+  margin: calc(var(--pixel-size) * 2);
+  perspective: 1000px;
 }
 
 .card {
@@ -13,8 +14,7 @@
   height: calc(var(--pixel-size) * 20);
   width: calc(var(--pixel-size) * 12);
   margin-bottom: calc((var(--pixel-size) * -19.5));
-  transition: all 0.7s ease-in-out;
-  perspective: 1000px;
+  transition: all .5s cubic-bezier(.55,.06,.68,.19);
   transform-style: preserve-3d;
 }
 
