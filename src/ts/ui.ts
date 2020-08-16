@@ -1,10 +1,11 @@
 function showOptions (title : string, options : string[]) {
+  console.log('Show Options', title, options);
+
   document.querySelector('.actions .options').innerHTML = ''
   options.map(option => {
     const button = document.createElement('button')
     button.innerText = option
     button.onclick = () => {
-      console.log('onclick option', option);
       players[0].nextOption = option
     }
     document.querySelector('.actions .options').appendChild(button)
@@ -20,4 +21,14 @@ function renderPlayers () {
       )
     })
   })
+}
+
+function renderActions (resolvePromise: Function) {
+  const location = players[0].location
+  const actions = locationActions[location]
+
+  console.log('Render actions', actions);
+
+  showOptions('Choose an action', actions.map(action => action.name))
+  resolvePromise()
 }

@@ -20,6 +20,12 @@ interface GameLocation {
   players: Player[]
 }
 
+interface LocationOptions {
+  name: string,
+  labels: [string, string][],
+  effect: (player: Player) => void
+}
+
 interface Game {
   players: Player[],
   time: number,

@@ -34,7 +34,7 @@ const animatePlayers = () : Promise<null> => {
 // Game shows possible actions to players
 const displayActions = () : Promise<null> => {
   return new Promise((resolve) => {
-
+    renderActions(resolve)
   })
 }
 
@@ -80,7 +80,7 @@ const mainLoop = () => {
   .then(waitForPlayersLocation)
   .then(animatePlayers)
   .then(displayActions)
-  // .then(promptForAction)
+  .then(promptForAction)
   // .then(waitForPlayersActions)
   // .then(applyActionEffects)
   // .then(displayRewards)

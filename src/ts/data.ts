@@ -10,7 +10,7 @@ const locations: GameLocation[] = [
   HELL,
 ].map((name: LocationName) => ({name: name, players: []}))
 
-const options = {
+const locationActions: {[name: string]: LocationOptions[]} = {
   bank: [{
     name: 'Interest Return',
     labels: [
@@ -90,8 +90,34 @@ const options = {
       }
     }
   ],
-
 }
+
+const policy = [
+  {
+    name: 'Blackmail'
+  }
+]
+
+const blessings = [
+  {
+    name: 'Ancient Relic',
+    options: [
+      {
+        name: 'Sell +1 💰'
+      },
+      {
+        name: 'Keep'
+      }
+    ]
+  }
+]
+
+const damnations = [
+  {
+    name: 'Deluge',
+    label: 'Players on Earth -1⚜️'
+  }
+]
 
 
 function updatePlayerLocation (resolve : Function) {
