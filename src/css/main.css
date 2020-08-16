@@ -1,0 +1,12 @@
+body {
+  font-family: sans-serif;
+  font-size: 2vh;
+}
+
+button {
+  font-size: inherit;
+}
+
+.hidden {
+  display: none;
+}

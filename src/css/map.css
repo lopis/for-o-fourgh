@@ -1,10 +1,84 @@
 .map {
   background-image: url('background.png');
   background-size: 100%;
-  height: 60vh;
-  width: 60vh;
-  max-height: 60vw;
-  max-width: 60vw;
+  height: 640px;
+  width: 640px;
   image-rendering: pixelated;
   image-rendering: optimizespeed;
+  position: relative;
+}
+
+.map span {
+  position: absolute;
+  display: flex;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  color: #504c40;
+  text-shadow: 0px 0px 11px white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.map span::after {
+  content: attr(class);
+  position: absolute;
+  bottom: 10px;
+}
+
+.bank {
+  bottom: 0;
+}
+
+.court {
+  bottom: 0;
+  right: 0;
+  justify-content: flex-end;
+}
+
+.temple {
+  top: 200px;
+  width: 100%;
+  justify-content: center;
+}
+
+.eden {
+
+}
+
+.hell {
+  right: 0;
+  justify-content: flex-end;
+}
+
+.char {
+  background-image: url('characters.png');
+  background-size: 200px 90px;
+  height: 90px;
+  width: 40px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.char:nth-child(2n+1):last-child {
+	margin-right: 0;
+}
+
+.devotee {
+  background-position-x: 0%;
+}
+
+.saint {
+  background-position-x: 100%;
+}
+
+.baal {
+  background-position-x: 25%;
+}
+
+.marx {
+  background-position-x: 75%;
+}
+
+.dissident {
+  background-position-x: 50%;
 }

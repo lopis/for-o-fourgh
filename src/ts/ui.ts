@@ -4,6 +4,7 @@ function showOptions (title : string, options : string[]) {
     const button = document.createElement('button')
     button.innerText = option
     button.onclick = () => {
+      console.log('onclick option', option);
       players[0].nextOption = option
     }
     document.querySelector('.actions .options').appendChild(button)
@@ -11,9 +12,12 @@ function showOptions (title : string, options : string[]) {
   document.querySelector('.actions .title').innerHTML = title
 }
 
-
-function updatePlayerLocation (resolve : Function) {
-  players.forEach(player => {
-    
+function renderPlayers () {
+  locations.forEach(location => {
+    location.players.forEach(player => {
+      document.querySelector(`.${location.name}`).appendChild(
+        document.querySelector(`.char.${player.char}`)
+      )
+    })
   })
 }

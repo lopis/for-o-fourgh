@@ -79,25 +79,26 @@ const mainLoop = () => {
   promptNextLocation()
   .then(waitForPlayersLocation)
   .then(animatePlayers)
-  .then(displayActions)
-  .then(promptForAction)
-  .then(waitForPlayersActions)
-  .then(applyActionEffects)
-  .then(displayRewards)
+  // .then(displayActions)
+  // .then(promptForAction)
+  // .then(waitForPlayersActions)
+  // .then(applyActionEffects)
+  // .then(displayRewards)
   .then(mainLoop)
 }
 
 function gameStart () {
   players.push({
     name: 'Player',
+    char: 'baal',
     gold: 1,
     influence: 0,
     relics: 0,
-    nextOption: '',
+    nextOption: null,
     location: BANK
   })
 
   console.log('Game start');
 
-  mainLoop();
+  updatePlayerLocation(mainLoop);
 }
