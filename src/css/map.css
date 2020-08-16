@@ -1,65 +1,118 @@
 .map {
   background-image: url('background.png');
   background-size: 100%;
-  height: 640px;
-  width: 640px;
+  animation: map 2s infinite;
+  height: calc(var(--pixel-size) * 64);
+  width: calc(var(--pixel-size) * 64);
   image-rendering: pixelated;
   image-rendering: optimizespeed;
   position: relative;
 }
 
+@keyframes map {
+  0% {
+    background-image: url('background.png');
+  }
+  50% {
+    background-image: url(map_overlay.png), url(background.png);
+  }
+}
+
 .map span {
   position: absolute;
   display: flex;
-  padding: 40px 20px;
-  box-sizing: border-box;
   color: #504c40;
-  text-shadow: 0px 0px 11px white;
+  text-shadow: 0px 0px var(--pixel-size) white;
   text-transform: uppercase;
   font-weight: bold;
+  min-height: calc(var(--pixel-size) * 9);
 }
 
 .map span::after {
   content: attr(class);
   position: absolute;
-  bottom: 10px;
+  bottom: calc(var(--pixel-size) * -3);
 }
 
 .bank {
-  bottom: 0;
+  bottom: calc(var(--pixel-size) * 4);
+  left: calc(var(--pixel-size) * 4);
 }
 
 .court {
-  bottom: 0;
-  right: 0;
+  bottom: calc(var(--pixel-size) * 4);
+  right: calc(var(--pixel-size) * 4);
   justify-content: flex-end;
 }
 
 .temple {
-  top: 200px;
+  top: calc(var(--pixel-size) * 25);
   width: 100%;
   justify-content: center;
 }
 
 .eden {
-
+  top: calc(var(--pixel-size) * 1);
+  left: calc(var(--pixel-size) * 4);
 }
 
 .hell {
-  right: 0;
+  top: calc(var(--pixel-size) * 1);
+  right: calc(var(--pixel-size) * 4);
   justify-content: flex-end;
 }
 
 .char {
   background-image: url('characters.png');
-  background-size: 200px 90px;
-  height: 90px;
-  width: 40px;
+  background-size: calc(var(--pixel-size) * 20) calc(var(--pixel-size) * 27);
+  height: calc(var(--pixel-size) * 9);
+  width: calc(var(--pixel-size) * 4);
   display: inline-block;
-  margin-right: 10px;
+  margin-right: calc(var(--pixel-size) * 1);
 }
 
-.char:nth-child(2n+1):last-child {
+.char.animated {
+  position: relative;
+  animation: walk 0.3s steps(1) infinite;
+}
+
+@keyframes walk {
+  0% {
+    background-position-y: 50%;
+  }
+  50% {
+    background-position-y: 100%;
+  }
+  100% {
+    background-position-y: 50%;
+  }
+}
+
+@keyframes move {
+  0% {
+    left: 0px;
+  }
+  50% {
+    left: calc(var(--pixel-size) * 30);
+  }
+  100% {
+    left: 0px;
+  }
+}
+
+@keyframes flip {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(-1);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.temple .char:nth-child(2n+1):last-child {
 	margin-right: 0;
 }
 
