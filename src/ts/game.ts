@@ -98,6 +98,26 @@ function gameStart () {
     location: BANK
   })
 
+  // players.push({
+  //   name: 'Player',
+  //   char: 'marx',
+  //   gold: 1,
+  //   influence: 0,
+  //   relics: 0,
+  //   nextOption: null,
+  //   location: COURT
+  // })
+
+  // players.push({
+  //   name: 'Player',
+  //   char: 'dissident',
+  //   gold: 1,
+  //   influence: 0,
+  //   relics: 0,
+  //   nextOption: null,
+  //   location: TEMPLE
+  // })
+
   console.log('Game start');
 
   updatePlayerLocation(mainLoop);

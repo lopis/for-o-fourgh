@@ -1,0 +1,51 @@
+body {
+  --pixel-height: var(--pixel-size) / 2;
+  --pixel-width: var(--pixel-size) / 2;
+}
+
+.letter {
+  font-family: monospace;
+  display: inline-flex;
+  flex-wrap: wrap;
+  width: calc(3 * var(--pixel-width));
+  height: calc(5 * var(--pixel-height));
+  margin-top: calc(1 * var(--pixel-height));
+}
+
+.letter.w4 {
+  width: calc(4 * var(--pixel-width));
+}
+
+.letter.w1 {
+  width: calc(1 * var(--pixel-height));
+}
+
+.letter + .letter {
+  margin-left: calc(0.5 * var(--pixel-width));
+}
+
+.letter > i {
+  width: calc(1 * var(--pixel-width));
+  height: calc(1 * var(--pixel-height));
+  /*border: calc(0.1 * var(--pixel-height)) solid transparent;
+  margin: calc(-0.1 * var(--pixel-height));*/
+  /* box-shadow: 0 0 calc(.1 * var(--pixel-height)) calc(.1 * var(--pixel-height)) currentColor; */
+}
+
+i[black] {
+  background: currentColor;
+}
+
+i:not([black]) {
+  color: transparent;
+}
+
+.word {
+  white-space: nowrap;
+  display: inline-block;
+  margin-right: calc(2 * var(--pixel-width));
+}
+
+.word:last-child {
+  margin-right: 0;
+}

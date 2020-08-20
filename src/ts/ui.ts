@@ -17,9 +17,15 @@ function renderPlayers () {
   locations.forEach(location => {
     location.players.forEach(player => {
       document.querySelector(`.${location.name}`).appendChild(
-        document.querySelector(`.char.${player.char}`)
+        document.querySelector(`.map .char.${player.char}`)
       )
     })
+  })
+}
+
+function renderPlayerCards () {
+  players.forEach(player => {
+
   })
 }
 

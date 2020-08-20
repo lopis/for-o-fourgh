@@ -1,12 +1,12 @@
 .decks {
 	position: absolute;
 	top: calc(var(--pixel-size) * 7);
-	display: flex;
 }
 
 .deck {
-  margin: calc(var(--pixel-size) * 2);
-  perspective: 1000px;
+	margin: calc(var(--pixel-size) * 2);
+	perspective: 1000px;
+	height: calc(var(--pixel-size) * 20);
 }
 
 .card {
@@ -53,7 +53,7 @@
 
 .blessings .card .front,
 .blessings .card .back {
-  background: #ffe489;
+  background: #2693ad;
 }
 
 .damnations .card .front,
@@ -70,6 +70,7 @@
 .card .front {
   display: flex;
   font-size: 8vh;
+  user-select: none;
 }
 
 .card .back {

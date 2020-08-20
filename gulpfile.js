@@ -1,16 +1,17 @@
-var chalk = require('chalk');
-var concat = require('gulp-concat');
-var cssmin = require('gulp-cssmin');
-var concatCss = require('gulp-concat-css');
-var fs = require('fs');
-var gulp = require('gulp');
-var htmlmin = require('gulp-htmlmin');
-var mkdirp = require('mkdirp');
-var uglify = require('gulp-uglify-es').default;
-var watch = require('gulp-watch');
-var zip = require('gulp-zip');
-var ts = require('gulp-typescript');
-var inject = require('gulp-inject');
+const chalk = require('chalk');
+const concat = require('gulp-concat');
+const concatCss = require('gulp-concat-css');
+const cssmin = require('gulp-cssmin');
+const fs = require('fs');
+const gulp = require('gulp');
+const htmlmin = require('gulp-htmlmin');
+const imagemin = require('gulp-imagemin');
+const inject = require('gulp-inject');
+const mkdirp = require('mkdirp');
+const ts = require('gulp-typescript');
+const uglify = require('gulp-uglify-es').default;
+const watch = require('gulp-watch');
+const zip = require('gulp-zip');
 
 //Chalk colors
 var error = chalk.bold.red;
@@ -91,7 +92,7 @@ gulp.task('inject-css', (done) => {
 })
 
 
-gulp.task('build-assets', (done) => {
+gulp.task('copy-img', (done) => {
 	return gulp.src('./src/assets/**/*')
 		.pipe(gulp.dest('./build/'));
 });
@@ -104,6 +105,12 @@ gulp.task('zip', (done) => {
   ])
 		.pipe(zip('entry.zip')) //gulp-zip performs compression by default
 		.pipe(gulp.dest('dist'));
+});
+
+gulp.task('build-img', () => {
+  return gulp.src('src/assets/**')
+    .pipe(imagemin())
+    .pipe(gulp.dest('build'));
 });
 
 gulp.task('check', gulp.series('zip', (done) => {
@@ -119,27 +126,25 @@ gulp.task('check', gulp.series('zip', (done) => {
 }));
 
 gulp.task('build-prod', gulp.series(
-  'build-html',
-	'build-ts',
-	'build-js',
-  'build-css',
-  'inject-css',
-	'build-assets',
-	'check',
-	'zip',
-	(done) => {console.log('\x07');done();}
+  gulp.parallel(
+    'build-html',
+    'build-ts',
+    'build-css',
+    'build-img',
+  ),
+  gulp.parallel(
+    'build-js',
+    'inject-css',
+  ),
+	'check', //also zips,
+	(done) => {beeper(); done();}
 ));
 gulp.task('build-dev', gulp.series(
 	'build-html',
-	// 'build-ts',
-  // 'build-css',
-  // 'inject-css',
-	// 'build-js',
-	// 'check',
 	'build-ts',
 	'build-js-dev',
   'build-css',
   'inject-css',
-	'build-assets',
-	(done) => {console.log('\x07');done();}
+	'copy-img',
+	(done) => {done();}
 ));

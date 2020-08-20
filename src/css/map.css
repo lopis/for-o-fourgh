@@ -7,7 +7,7 @@
   image-rendering: pixelated;
   image-rendering: optimizespeed;
   position: relative;
-  margin: auto 5% auto auto;
+  margin: auto;
   border: var(--pixel-size) solid #c4bfb0;
 }
 
@@ -37,20 +37,18 @@
   }
 }
 
-.map span {
+.map > span {
   position: absolute;
   display: flex;
   color: #504c40;
-  text-shadow: 0px 0px var(--pixel-size) white;
   text-transform: uppercase;
   font-weight: bold;
   min-height: calc(var(--pixel-size) * 9);
 }
 
-.map span::after {
-  content: attr(class);
-  position: absolute;
-  bottom: calc(var(--pixel-size) * -3);
+.map .text {
+	position: absolute;
+	bottom: calc(var(--pixel-size) * -3);
 }
 
 .bank {
@@ -131,7 +129,8 @@
   }
 }
 
-.temple .char:nth-child(2n+1):last-child {
+.temple .char:nth-child(2n):last-child,
+.temple .char:only-child {
 	margin-right: 0;
 }
 

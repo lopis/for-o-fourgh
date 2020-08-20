@@ -1,0 +1,53 @@
+.stats {
+	position: absolute;
+	top: calc(var(--pixel-size) * 7);
+	right: 0;
+	margin: calc(var(--pixel-size) * 1);
+}
+
+.stats .player {
+  background: #fff8e3;
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--pixel-size) * 9);
+  width: calc(var(--pixel-size) * 15);
+  flex-wrap: wrap;
+  padding: calc(var(--pixel-size) * 1);
+  text-align: right;
+  align-items: center;
+  justify-content: space-around;
+  position: relative;
+  margin: calc(var(--pixel-size) * 2);
+}
+
+.stats .player::before {
+  content: "";
+  display: block;
+  width: calc(100% + var(--pixel-size));
+  height: calc(100% - var(--pixel-size));
+  position: absolute;
+  background: inherit;
+  z-index: -1;
+}
+
+.stats .char {
+  image-rendering: pixelated;
+  image-rendering: optimizespeed;
+}
+
+.gold::after {
+  content: "💰";
+  margin-left: 0.5em;
+}
+
+.relics::after {
+  content: "🏺";
+  margin-left: 0.5em;
+}
+
+.influence::after {
+  content: "⚜️";
+  margin-left: 0.5em;
+}
+
+
