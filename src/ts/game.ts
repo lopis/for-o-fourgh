@@ -4,7 +4,8 @@
 
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    showOptions('Go to', [BANK, COURT, TEMPLE, EDEN, HELL])
+    showOptions('Go to', [BANK, COURT, TEMPLE, EDEN, HELL].map(str => ({title: str, html: str})))
+    applyTinyFont('.btn')
     resolve()
   })
 }

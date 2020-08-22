@@ -13,9 +13,7 @@ const locations: GameLocation[] = [
 const locationActions: {[name: string]: LocationOptions[]} = {
   bank: [{
     name: 'Interest Return',
-    labels: [
-      ['💰', '💰 + 💰 / 5 ⚜️']
-    ],
+    labels: ['💰 + 💰 / 5 ⚜️'],
     effect: (player: Player) => {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.gold += 1 + Math.floor(player.influence / 5)
@@ -25,19 +23,14 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   court: [
     {
       name: 'Draw Policy',
-      labels: [
-        ['⚖️', 'draw 1']
-      ],
+      labels: ['draw 1 🏛'],
       effect: (player: Player) => {
         console.log('not implemented', 'player drew a policy card');
       }
     },
     {
       name: 'Embezzlement',
-      labels: [
-        ['🏺', '+1'],
-        ['💰', '-2'],
-      ],
+      labels: ['+1 🏺', '-2 💰'],
       effect: (player: Player) => {
         console.log('not implemented', 'player gets 1 relic');
       }
@@ -47,20 +40,14 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   temple: [
     {
       name: 'Offering',
-      labels: [
-        ['🏺', '-1'],
-        ['⚜️', '+3'],
-      ],
+      labels: ['-1 🏺','+3 ⚜️'],
       effect: (player: Player) => {
         console.log('not implemented', 'player offers 1 relic for 3 influence');
       }
     },
     {
       name: 'Donation',
-      labels: [
-        ['💰', '-1'],
-        ['⚜️', '+1'],
-      ],
+      labels: ['💰', '-1','⚜️', '+1'],
       effect: (player: Player) => {
         console.log('not implemented', 'player donates 1 gold for 1 influence');
       }
@@ -70,9 +57,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   eden: [
     {
       name: 'Blessing',
-      labels: [
-        ['🧿', 'draw 1']
-      ],
+      labels: ['draw 1 ✨'],
       effect: (player: Player) => {
         console.log('not implemented', 'player draws a blessing card');
       }
@@ -82,9 +67,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   hell: [
     {
       name: 'Wrath',
-      labels: [
-        ['🌩', 'draw 1']
-      ],
+      labels: ['draw 1 🌊'],
       effect: (player: Player) => {
         console.log('not implemented', 'player draws a damnation card');
       }

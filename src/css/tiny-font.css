@@ -1,35 +1,35 @@
-body {
-  --pixel-height: var(--pixel-size) / 2;
-  --pixel-width: var(--pixel-size) / 2;
+.tiny-font {
+  --dot-height: var(--dot-size) / 2;
+  --dot-width: var(--dot-size) / 2;
 }
 
 .letter {
   font-family: monospace;
   display: inline-flex;
   flex-wrap: wrap;
-  width: calc(3 * var(--pixel-width));
-  height: calc(5 * var(--pixel-height));
-  /* margin-top: calc(1 * var(--pixel-height)); */
+  width: calc(3 * var(--dot-width));
+  height: calc(5 * var(--dot-height));
+  /* margin-top: calc(1 * var(--dot-height)); */
 }
 
 .letter.w4 {
-  width: calc(4 * var(--pixel-width));
+  width: calc(4 * var(--dot-width));
 }
 
 .letter.w1 {
-  width: calc(1 * var(--pixel-height));
+  width: calc(1 * var(--dot-height));
 }
 
 .letter + .letter {
-  margin-left: calc(0.5 * var(--pixel-width));
+  margin-left: calc(0.5 * var(--dot-width));
 }
 
 .letter > i {
-  width: calc(1 * var(--pixel-width));
-  height: calc(1 * var(--pixel-height));
-  /*border: calc(0.1 * var(--pixel-height)) solid transparent;
-  margin: calc(-0.1 * var(--pixel-height));*/
-  /* box-shadow: 0 0 calc(.1 * var(--pixel-height)) calc(.1 * var(--pixel-height)) currentColor; */
+  width: calc(1 * var(--dot-width));
+  height: calc(1 * var(--dot-height));
+  /*border: calc(0.1 * var(--dot-height)) solid transparent;
+  margin: calc(-0.1 * var(--dot-height));*/
+  /* box-shadow: 0 0 calc(.1 * var(--dot-height)) calc(.1 * var(--dot-height)) currentColor; */
 }
 
 i[black] {
@@ -43,7 +43,7 @@ i:not([black]) {
 .word {
   white-space: nowrap;
   display: inline-block;
-  margin-right: calc(2 * var(--pixel-width));
+  margin-right: calc(2 * var(--dot-width));
   vertical-align: middle;
   font-size: 0;
 }

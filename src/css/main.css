@@ -1,18 +1,31 @@
-html {
-  height: 100%;
+html, body {
+	margin: 0;
+	height: 100%;
 }
 
 body {
   font-size: 2vh;
   background: linear-gradient(#4a5360 40%,#72795c 40%);
+  box-sizing: border-box;
+  padding: var(--pixel-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
 
   --pixel-size: 10px;
+  --dot-size: var(--pixel-size);
 }
 
-button {
+.btn {
   font-size: inherit;
 }
 
 .hidden {
   display: none;
+}
+
+.title {
+  color: #fff8e3;
+  --dot-size: calc(var(--pixel-size) * 2);
 }

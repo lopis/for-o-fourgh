@@ -1,3 +1,7 @@
+.decks {
+  margin-right: calc(var(--pixel-size) * 6);
+}
+
 .deck {
 	margin: calc(var(--pixel-size) * 2);
 	perspective: 1000px;
@@ -64,7 +68,7 @@
 
 .card .front {
   display: flex;
-  font-size: 8vh;
+  font-size: calc(var(--pixel-size) * 6);
   user-select: none;
 }
 

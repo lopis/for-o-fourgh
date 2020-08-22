@@ -1,12 +1,13 @@
-function showOptions (title : string, options : string[]) {
-  console.log('Show Options', title, options);
+function showOptions (title : string, options : Option[]) {
+  console.log('Show Options', title, options)
 
   document.querySelector('.actions .options').innerHTML = ''
   options.map(option => {
-    const button = document.createElement('button')
-    button.innerText = option
+    const button = document.createElement('div')
+    button.innerHTML = option.html
+    button.className = 'btn'
     button.onclick = () => {
-      players[0].nextOption = option
+      players[0].nextOption = option.title
     }
     document.querySelector('.actions .options').appendChild(button)
   })
@@ -31,7 +32,8 @@ function renderPlayerCards () {
       <div class="text relics">${player.relics}</div>
       <div class="text influence">${player.influence}</div>
     </div>`
-  ).join('');
+  ).join('')
+  applyTinyFont()
 }
 
 function updatePlayerCards () {
@@ -40,24 +42,30 @@ function updatePlayerCards () {
     document.querySelector('.player .relics').innerHTML = `${player.relics}`
     document.querySelector('.player .influence').innerHTML = `${player.influence}`
   })
+  applyTinyFont()
 }
 
 function renderActions (resolvePromise: Function) {
   const location = players[0].location
   const actions = locationActions[location]
 
-  console.log('Render actions', actions);
+  console.log('Render actions', actions)
 
-  showOptions('Choose an action', actions.map(action => action.name))
+  showOptions('Choose an action', actions.map(
+    action => ({
+      title: action.name,
+      html: `<div class="action-title">${action.name}</div>
+        <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
+    })
+  ))
+  applyTinyFont('.action-title')
   resolvePromise()
 }
 
 function adjustUIScale () {
   const updatePixelSize = () => {
-    {
-      const smallestSize = Math.min(window.outerHeight, window.outerWidth - 100)
-      document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`)
-    }
+    const smallestSize = Math.min(document.body.scrollHeight, document.body.scrollWidth - 150)
+    document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`)
   }
 
   window.onresize = updatePixelSize

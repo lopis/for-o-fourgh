@@ -1,0 +1,38 @@
+.btn {
+	background: #fff8e3;
+	color: #504c40;
+	padding: var(--pixel-size);
+	line-height: 1;
+	display: inline-flex;
+  margin-left: calc(var(--pixel-size) * 2);
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.4em;
+}
+
+.btn::before {
+	content: "";
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background: #504c40;
+	top: var(--pixel-size);
+	right: var(--pixel-size);
+	z-index: -1;
+}
+
+.btn:active {
+  top: var(--pixel-size);
+  right: var(--pixel-size);
+}
+
+.btn:active::before {
+  top: 1px;
+  right: 1px;
+}
+
+.labels div {
+  display: inline-block;
+  padding: 1em 0.5em 0;
+}

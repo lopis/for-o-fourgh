@@ -8,6 +8,7 @@
   image-rendering: optimizespeed;
   position: relative;
   border: var(--pixel-size) solid #c4bfb0;
+  margin: calc(2 * var(--pixel-size)) 0;
 }
 
 .map::after, .map::before {
@@ -45,7 +46,7 @@
   min-height: calc(var(--pixel-size) * 9);
 }
 
-.map .text {
+.map .tiny-font {
 	position: absolute;
 	bottom: calc(var(--pixel-size) * -3);
 }
