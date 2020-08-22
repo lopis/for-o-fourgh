@@ -34,6 +34,7 @@
 
 i[black] {
   background: currentColor;
+  box-shadow: 1px 0 0 0 currentColor, 1px 1px 0 0 currentColor;
 }
 
 i:not([black]) {
