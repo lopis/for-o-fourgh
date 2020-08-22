@@ -17,7 +17,8 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     effect: (player: Player) => {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.gold += 1 + Math.floor(player.influence / 5)
-    }
+    },
+    disabled: (player: Player) => false
   }],
 
   court: [
@@ -26,31 +27,35 @@ const locationActions: {[name: string]: LocationOptions[]} = {
       labels: ['draw 1 🏛'],
       effect: (player: Player) => {
         console.log('not implemented', 'player drew a policy card');
-      }
+      },
+      disabled: (player: Player) => false
     },
     {
       name: 'Embezzlement',
       labels: ['+1 🏺', '-2 💰'],
       effect: (player: Player) => {
         console.log('not implemented', 'player gets 1 relic');
-      }
+      },
+      disabled: (player: Player) => player.gold < 2
     }
   ],
 
   temple: [
     {
       name: 'Offering',
-      labels: ['-1 🏺','+3 ⚜️'],
+      labels: ['+3 ⚜️', '-1 🏺'],
       effect: (player: Player) => {
         console.log('not implemented', 'player offers 1 relic for 3 influence');
-      }
+      },
+      disabled: (player: Player) => player.relics < 1
     },
     {
       name: 'Donation',
-      labels: ['💰', '-1','⚜️', '+1'],
+      labels: ['-1 💰','+1 ⚜️'],
       effect: (player: Player) => {
         console.log('not implemented', 'player donates 1 gold for 1 influence');
-      }
+      },
+      disabled: (player: Player) => player.gold < 1
     }
   ],
 
@@ -60,7 +65,8 @@ const locationActions: {[name: string]: LocationOptions[]} = {
       labels: ['draw 1 ✨'],
       effect: (player: Player) => {
         console.log('not implemented', 'player draws a blessing card');
-      }
+      },
+      disabled: (player: Player) => false
     }
   ],
 
@@ -70,7 +76,8 @@ const locationActions: {[name: string]: LocationOptions[]} = {
       labels: ['draw 1 🌊'],
       effect: (player: Player) => {
         console.log('not implemented', 'player draws a damnation card');
-      }
+      },
+      disabled: (player: Player) => false
     }
   ],
 }

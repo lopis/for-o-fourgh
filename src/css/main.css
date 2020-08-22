@@ -27,5 +27,10 @@ body {
 
 .title {
   color: #fff8e3;
+  margin-bottom: var(--pixel-size);
+}
+
+h1 {
   --dot-size: calc(var(--pixel-size) * 2);
+  margin: 0;
 }

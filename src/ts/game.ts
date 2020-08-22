@@ -4,7 +4,13 @@
 
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    showOptions('Go to', [BANK, COURT, TEMPLE, EDEN, HELL].map(str => ({title: str, html: str})))
+    showOptions('Go to',
+      [BANK, COURT, TEMPLE, EDEN, HELL]
+      .map((location, idx) => ({
+        title: location,
+        html: `${idx + 1}._${location}`,
+        disabled: location === players[0].location
+      })))
     applyTinyFont('.btn')
     resolve()
   })

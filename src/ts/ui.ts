@@ -1,17 +1,21 @@
 function showOptions (title : string, options : Option[]) {
-  console.log('Show Options', title, options)
-
   document.querySelector('.actions .options').innerHTML = ''
   options.map(option => {
     const button = document.createElement('div')
     button.innerHTML = option.html
     button.className = 'btn'
-    button.onclick = () => {
-      players[0].nextOption = option.title
+
+    if (!option.disabled) {
+      button.onclick = () => {
+        players[0].nextOption = option.title
+      }
+    } else {
+      button.classList.add('disabled')
     }
     document.querySelector('.actions .options').appendChild(button)
   })
   document.querySelector('.actions .title').innerHTML = title
+  applyTinyFont('.actions .title')
 }
 
 function renderPlayers () {
@@ -52,9 +56,10 @@ function renderActions (resolvePromise: Function) {
   console.log('Render actions', actions)
 
   showOptions('Choose an action', actions.map(
-    action => ({
+    (action, index) => ({
       title: action.name,
-      html: `<div class="action-title">${action.name}</div>
+      disabled: action.disabled(players[0]),
+      html: `<div class="action-title">${index+1}._${action.name}</div>
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })
   ))

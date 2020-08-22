@@ -6,16 +6,17 @@ interface FontData {
 
 // TODO: compress all to hex
 const letters: FontData = {
-  "*": 0x7b6f,
-  "0": 0x62a7,
-  "2": 0x728e,
-  "3": 0x4bc9,
-  "4": 0x798e,
-  "5": 0x69ef,
-  "6": 0x7252,
-  "7": 0x7aaf,
-  "8": 0x7bcb,
-  "9": 0xaa8,
+  "0": 0x7b6f,
+  "2": 0x62a7,
+  "3": 0x728e,
+  "4": 0x4bc9,
+  "5": 0x798e,
+  "6": 0x69ef,
+  "7": 0x7252,
+  "8": 0x7aaf,
+  "9": 0x7bcb,
+  "*": 0xaa8,
+
   "a": 0x2b7d,
   "b": 0x6bee,
   "c": 0x7927,
@@ -44,10 +45,11 @@ const letters: FontData = {
 
 const narrowLetters: FontData = {
   "1": 0b11111,
+  ".": 0b00001,
   ",": 0b00011,
   "'": 0b11000,
-  ".": 0b00001,
   ":": 0b01010,
+  "_": 0,
 }
 
 const wideLetters: FontData = {
@@ -65,7 +67,7 @@ const preRenderFont = (data: FontData, width: number) => {
       }
     }).join('')
 
-    tinyFontData[letter] = `<div class="letter w${width}">${pixels}</div>`
+    tinyFontData[`_${letter}`] = `<div class="letter w${width}">${pixels}</div>`
   })
 }
 
@@ -81,7 +83,7 @@ function applyTinyFont (selector: string | null = '.text') : void {
       const text = element.innerHTML
       element.innerHTML = text.trim().split(' ').map(word => `<span class="word">
         ${word.split('').map(letter => {
-          return tinyFontData[letter.toLowerCase()]
+          return tinyFontData[`_${letter.toLowerCase()}`]
         }).join('')}
       </span>`).join('')
     }

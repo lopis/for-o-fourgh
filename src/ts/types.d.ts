@@ -23,7 +23,8 @@ interface GameLocation {
 interface LocationOptions {
   name: string,
   labels: string[],
-  effect: (player: Player) => void
+  effect: (player: Player) => void,
+  disabled: (player: Player) => boolean,
 }
 
 interface Game {
@@ -39,4 +40,5 @@ interface Action {
 interface Option {
   html: string,
   title: string,
+  disabled: boolean,
 }
