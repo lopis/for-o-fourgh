@@ -24,8 +24,21 @@ function renderPlayers () {
 }
 
 function renderPlayerCards () {
-  players.forEach(player => {
+  document.querySelector('.stats').innerHTML = players.map(
+    player => `<div class="player">
+      <div class="avatar char ${player.char}"></div>
+      <div class="text gold">${player.gold}</div>
+      <div class="text relics">${player.relics}</div>
+      <div class="text influence">${player.influence}</div>
+    </div>`
+  ).join('');
+}
 
+function updatePlayerCards () {
+  players.forEach(player => {
+    document.querySelector('.player .gold').innerHTML = `${player.gold}`
+    document.querySelector('.player .relics').innerHTML = `${player.relics}`
+    document.querySelector('.player .influence').innerHTML = `${player.influence}`
   })
 }
 
@@ -37,4 +50,16 @@ function renderActions (resolvePromise: Function) {
 
   showOptions('Choose an action', actions.map(action => action.name))
   resolvePromise()
+}
+
+function adjustUIScale () {
+  const updatePixelSize = () => {
+    {
+      const smallestSize = Math.min(window.outerHeight, window.outerWidth - 100)
+      document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`)
+    }
+  }
+
+  window.onresize = updatePixelSize
+  updatePixelSize()
 }

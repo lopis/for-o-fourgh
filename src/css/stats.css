@@ -1,7 +1,4 @@
 .stats {
-	position: absolute;
-	top: calc(var(--pixel-size) * 7);
-	right: 0;
 	margin: calc(var(--pixel-size) * 1);
 }
 
@@ -50,4 +47,7 @@
   margin-left: 0.5em;
 }
 
-
+.gold, .influence, .relics {
+  --pixel-height: var(--pixel-size)/3;
+  --pixel-width: var(--pixel-size)/3;
+}

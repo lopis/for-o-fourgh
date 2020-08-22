@@ -138,5 +138,7 @@ function updatePlayerLocation (resolve : Function) {
     player.nextOption = null
   })
   renderPlayers();
+  renderPlayerCards()
+
   resolve()
 }

@@ -9,7 +9,7 @@ body {
   flex-wrap: wrap;
   width: calc(3 * var(--pixel-width));
   height: calc(5 * var(--pixel-height));
-  margin-top: calc(1 * var(--pixel-height));
+  /* margin-top: calc(1 * var(--pixel-height)); */
 }
 
 .letter.w4 {
@@ -44,6 +44,8 @@ i:not([black]) {
   white-space: nowrap;
   display: inline-block;
   margin-right: calc(2 * var(--pixel-width));
+  vertical-align: middle;
+  font-size: 0;
 }
 
 .word:last-child {

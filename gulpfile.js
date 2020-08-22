@@ -137,7 +137,7 @@ gulp.task('build-prod', gulp.series(
     'inject-css',
   ),
 	'check', //also zips,
-	(done) => {beeper(); done();}
+	(done) => {done();}
 ));
 gulp.task('build-dev', gulp.series(
 	'build-html',

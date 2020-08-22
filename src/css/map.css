@@ -7,7 +7,6 @@
   image-rendering: pixelated;
   image-rendering: optimizespeed;
   position: relative;
-  margin: auto;
   border: var(--pixel-size) solid #c4bfb0;
 }
 

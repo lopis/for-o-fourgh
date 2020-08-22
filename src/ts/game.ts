@@ -32,30 +32,33 @@ const animatePlayers = () : Promise<null> => {
 }
 
 // Game shows possible actions to players
-const displayActions = () : Promise<null> => {
+const promptNextAction = () : Promise<null> => {
   return new Promise((resolve) => {
     renderActions(resolve)
-  })
-}
-
-//
-const promptForAction = () : Promise<null> => {
-  return new Promise((resolve) => {
-
   })
 }
 
 // Wait for all players to pick their actions, up to limit
 const waitForPlayersActions = () : Promise<null> => {
   return new Promise((resolve) => {
-
+    waitForAllOptions(resolve)
   })
 }
 
 // Game applies action reward/price for all players
 const applyActionEffects = () : Promise<null> => {
   return new Promise((resolve) => {
+    players.forEach(player => {
+      const nextAction = locationActions[player.location].find(
+        action => action.name === player.nextOption
+      )
+      player.nextOption = null
 
+      nextAction.effect(player)
+      updatePlayerCards()
+
+      resolve()
+    })
   })
 }
 
@@ -79,10 +82,9 @@ const mainLoop = () => {
   promptNextLocation()
   .then(waitForPlayersLocation)
   .then(animatePlayers)
-  .then(displayActions)
-  .then(promptForAction)
-  // .then(waitForPlayersActions)
-  // .then(applyActionEffects)
+  .then(promptNextAction)
+  .then(waitForPlayersActions)
+  .then(applyActionEffects)
   // .then(displayRewards)
   .then(mainLoop)
 }
@@ -97,28 +99,6 @@ function gameStart () {
     nextOption: null,
     location: BANK
   })
-
-  // players.push({
-  //   name: 'Player',
-  //   char: 'marx',
-  //   gold: 1,
-  //   influence: 0,
-  //   relics: 0,
-  //   nextOption: null,
-  //   location: COURT
-  // })
-
-  // players.push({
-  //   name: 'Player',
-  //   char: 'dissident',
-  //   gold: 1,
-  //   influence: 0,
-  //   relics: 0,
-  //   nextOption: null,
-  //   location: TEMPLE
-  // })
-
-  console.log('Game start');
 
   updatePlayerLocation(mainLoop);
 }
