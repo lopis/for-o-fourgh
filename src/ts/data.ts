@@ -24,36 +24,40 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   court: [
     {
       name: 'Draw Policy',
-      labels: ['draw 1 🏛'],
+      labels: ['draw 1 📜'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player drew a policy card');
+        drawCard('policies')
       },
       disabled: (player: Player) => false
     },
     {
       name: 'Embezzlement',
-      labels: ['+1 🏺', '-2 💰'],
+      labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player gets 1 relic');
+        player.influence -= 1
+        player.gold += 2
+        player.relics += 1
       },
-      disabled: (player: Player) => player.gold < 2
+      disabled: (player: Player) => player.influence < 1
     }
   ],
 
   temple: [
     {
       name: 'Offering',
-      labels: ['+3 ⚜️', '-1 🏺'],
+      labels: ['-1 🏺', '+3 ⚜️'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player offers 1 relic for 3 influence');
+        player.influence += 3
+        player.relics -= 1
       },
       disabled: (player: Player) => player.relics < 1
     },
     {
       name: 'Donation',
-      labels: ['-1 💰','+1 ⚜️'],
+      labels: ['-1 💰', '+1 ⚜️'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player donates 1 gold for 1 influence');
+        player.gold--
+        player.influence++
       },
       disabled: (player: Player) => player.gold < 1
     }
@@ -64,7 +68,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
       name: 'Blessing',
       labels: ['draw 1 ✨'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player draws a blessing card');
+        drawCard('blessings')
       },
       disabled: (player: Player) => false
     }
@@ -73,41 +77,71 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   hell: [
     {
       name: 'Wrath',
-      labels: ['draw 1 🌊'],
+      labels: ['draw 1 💢'],
       effect: (player: Player) => {
-        console.log('not implemented', 'player draws a damnation card');
+        drawCard('damnations')
       },
       disabled: (player: Player) => false
     }
   ],
 }
 
-const policy = [
-  {
-    name: 'Blackmail'
-  }
-]
-
-const blessings = [
-  {
-    name: 'Ancient Relic',
-    options: [
-      {
-        name: 'Sell +1 💰'
-      },
-      {
-        name: 'Keep'
-      }
-    ]
-  }
-]
-
-const damnations = [
-  {
-    name: 'Deluge',
-    label: 'Players on Earth -1⚜️'
-  }
-]
+const decks: {[name: string]: Card[]}= {
+  policies: [
+    {
+      name: 'Blackmail',
+      label: 'Steal 5 💰 or 2 ⚜️ from player',
+    },
+    {
+      name: 'Concession',
+      label: 'Steal 1 relic',
+      options: [
+        {
+          name: 'Player 2'
+        },
+        {
+          name: 'Player 3'
+        },
+        {
+          name: 'Player 4'
+        },
+        {
+          name: 'Player 5'
+        },
+      ]
+    },
+    {
+      name: 'Tax Reform',
+      options: [
+        {
+          name: 'Tax the richest 2💰'
+        },
+        {
+          name: 'Tax everyone 1💰'
+        }
+      ]
+    }
+  ],
+  blessings: [
+    {
+      name: 'Ancient Relic',
+      options: [
+        {
+          name: 'Sell +1 💰'
+        },
+        {
+          name: 'Keep'
+        }
+      ]
+    }
+  ],
+  damnations: [
+    {
+      name: 'Deluge',
+      label: 'Players on Earth -1⚜️'
+    }
+  ]
+}
 
 
 function updatePlayerLocation (resolve : Function) {
@@ -131,4 +165,43 @@ function updatePlayerLocation (resolve : Function) {
   renderPlayerCards()
 
   resolve()
+}
+
+
+function shuffleArray (array: Array<any>) {
+  for (let index = array.length - 1; index > 0; index--) {
+    const randomIndex = Math.floor(Math.random() * index)
+    const temp = array[index]
+    array[index] = array[randomIndex]
+    array[randomIndex] = temp
+  }
+}
+
+
+function createCardDecks () {
+  Object.entries(decks).forEach(([name, deck]) => {
+    let cards: HTMLElement[] = []
+    deck.forEach((entry) => {
+      for (let i = 0; i < CARD_COUNT; i++) {
+        const card = document.createElement('div')
+        card.className = 'card'
+        card.innerHTML = `<div class="front"></div>
+        <div class="back">
+          <p>${entry.name}</p>
+          <p>${entry.label}</p>
+        </div>`
+
+        cards.push(card)
+      }
+
+      console.log('cards', cards);
+
+    })
+    shuffleArray(cards)
+    cards.forEach(card => document.querySelector(`.deck.${name}`).append(card))
+  })
+}
+
+function drawCard (deckName : 'policies' | 'blessings' | 'damnations') {
+  animateCardFlip(deckName)
 }

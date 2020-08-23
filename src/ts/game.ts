@@ -107,5 +107,7 @@ function gameStart () {
     location: BANK
   })
 
+  createCardDecks()
+
   updatePlayerLocation(mainLoop);
 }

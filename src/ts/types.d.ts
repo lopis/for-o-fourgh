@@ -11,10 +11,6 @@ interface Player {
   location: LocationName
 }
 
-interface Card {
-  title: string,
-}
-
 interface GameLocation {
   name: LocationName,
   players: Player[]
@@ -41,4 +37,15 @@ interface Option {
   html: string,
   title: string,
   disabled: boolean,
+}
+
+interface CardOption {
+  name: string,
+  function?: Function
+}
+
+interface Card {
+  name: string,
+  label?: string,
+  options?: CardOption[]
 }

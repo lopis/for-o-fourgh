@@ -3,17 +3,17 @@
 }
 
 .deck {
-	margin: calc(var(--pixel-size) * 2);
+	margin: calc(var(--pixel-size) * 4) calc(var(--pixel-size) * 2);
 	perspective: 1000px;
-	height: calc(var(--pixel-size) * 20);
+	height: calc(var(--pixel-size) * 18);
 }
 
 .card {
   position: relative;
-  height: calc(var(--pixel-size) * 20);
+  height: calc(var(--pixel-size) * 18);
   width: calc(var(--pixel-size) * 12);
-  margin-bottom: calc((var(--pixel-size) * -19.5));
-  transition: all .5s cubic-bezier(.55,.06,.68,.19);
+  margin-bottom: calc((var(--pixel-size) * -17.5));
+  transition: transform .5s cubic-bezier(.55,.06,.68,.19), box-shadow .5s;
   transform-style: preserve-3d;
 }
 
@@ -42,12 +42,12 @@
 .card:nth-child(5) { margin-left: calc((var(--pixel-size) * 2.0));}
 .card:nth-child(n+6) {
   margin-left: calc((var(--pixel-size) * 2.5));
-  margin-bottom: calc(var(--pixel-size) * -20);
+  margin-bottom: calc(var(--pixel-size) * -18);
 }
 
 .policies .card .front,
 .policies .card .back {
-  background: #fff8e3;
+  background: #9faa7f;
 }
 
 .blessings .card .front,
@@ -70,6 +70,18 @@
   display: flex;
   font-size: calc(var(--pixel-size) * 6);
   user-select: none;
+}
+
+.policies .front::before {
+  content: '📜';
+}
+
+.blessings .front::before {
+  content: '✨';
+}
+
+.damnations .front::before {
+  content: '💢';
 }
 
 .card .back {

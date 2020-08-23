@@ -76,3 +76,12 @@ function adjustUIScale () {
   window.onresize = updatePixelSize
   updatePixelSize()
 }
+
+function animateCardFlip (deckName: string) {
+  const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card`)).pop()
+
+  topCard.classList.add('flip')
+  setTimeout(() => {
+    topCard.parentElement.removeChild(topCard)
+  }, CARD_TIMEOUT)
+}

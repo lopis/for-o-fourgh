@@ -1,0 +1,2 @@
+const CARD_COUNT = 5
+const CARD_TIMEOUT = 5000
