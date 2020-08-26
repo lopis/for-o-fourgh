@@ -60,6 +60,12 @@ const locationActions: {[name: string]: LocationOptions[]} = {
         player.influence++
       },
       disabled: (player: Player) => player.gold < 1
+    },
+    {
+      name: 'Skip',
+      labels: ['🙏'],
+      effect: () => {},
+      disabled: () => false,
     }
   ],
 
@@ -86,38 +92,27 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   ],
 }
 
-const decks: {[name: string]: Card[]}= {
+type DeckName = 'policies' | 'blessings' | 'damnations'
+
+const decks: {[name in DeckName]: Card[]}= {
   policies: [
     {
       name: 'Blackmail',
       label: 'Steal 5 💰 or 2 ⚜️ from player',
     },
     {
-      name: 'Concession',
+      name: 'Grant',
       label: 'Steal 1 relic',
-      options: [
-        {
-          name: 'Player 2'
-        },
-        {
-          name: 'Player 3'
-        },
-        {
-          name: 'Player 4'
-        },
-        {
-          name: 'Player 5'
-        },
-      ]
+      choosePlayer: true
     },
     {
       name: 'Tax Reform',
       options: [
         {
-          name: 'Tax the richest 2💰'
+          name: 'Tax richest </br> 2💰'
         },
         {
-          name: 'Tax everyone 1💰'
+          name: 'Tax all 👥 </br> 1💰'
         }
       ]
     }
@@ -130,9 +125,17 @@ const decks: {[name: string]: Card[]}= {
           name: 'Sell +1 💰'
         },
         {
-          name: 'Keep'
+          name: 'Keep + 1 🏺'
         }
       ]
+    },
+    {
+      name: 'Divine Sanction',
+      label: 'Players on Temple/Sky +1⚜️'
+    },
+    {
+      name: 'Judgement',
+      label: '👤 on Eden +2⚜️ <br>👤 on Hell -2⚜️'
     }
   ],
   damnations: [
@@ -167,38 +170,18 @@ function updatePlayerLocation (resolve : Function) {
   resolve()
 }
 
-
-function shuffleArray (array: Array<any>) {
-  for (let index = array.length - 1; index > 0; index--) {
-    const randomIndex = Math.floor(Math.random() * index)
-    const temp = array[index]
-    array[index] = array[randomIndex]
-    array[randomIndex] = temp
-  }
-}
-
-
 function createCardDecks () {
-  Object.entries(decks).forEach(([name, deck]) => {
-    let cards: HTMLElement[] = []
-    deck.forEach((entry) => {
+  Object.entries(decks).forEach(([deckName, deck]) => {
+    let cards: Card[] = []
+    deck.forEach((card) => {
+      // Adds same card multiple times
       for (let i = 0; i < CARD_COUNT; i++) {
-        const card = document.createElement('div')
-        card.className = 'card'
-        card.innerHTML = `<div class="front"></div>
-        <div class="back">
-          <p>${entry.name}</p>
-          <p>${entry.label}</p>
-        </div>`
-
-        cards.push(card)
+        cards.push({...card})
       }
-
-      console.log('cards', cards);
-
     })
     shuffleArray(cards)
-    cards.forEach(card => document.querySelector(`.deck.${name}`).append(card))
+
+    cards.forEach((card) => renderCard(card, deckName as DeckName))
   })
 }
 

@@ -78,6 +78,8 @@ function initTinyFont () {
 }
 
 function applyTinyFont (selector: string | null = '.text') : void {
+  if (!tinyFontData['_a']) return
+
   document.querySelectorAll(selector).forEach(element => {
     if (element.children.length === 0) {
       const text = element.innerHTML

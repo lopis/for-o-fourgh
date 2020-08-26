@@ -1,20 +1,24 @@
 .decks {
-  margin-right: calc(var(--pixel-size) * 6);
+  display: flex;
+  flex-direction: column;
 }
 
 .deck {
-	margin: calc(var(--pixel-size) * 4) calc(var(--pixel-size) * 2);
+  margin-top: calc(var(--pixel-size) * 5);
 	perspective: 1000px;
 	height: calc(var(--pixel-size) * 18);
 }
 
 .card {
   position: relative;
-  height: calc(var(--pixel-size) * 18);
-  width: calc(var(--pixel-size) * 12);
-  margin-bottom: calc((var(--pixel-size) * -17.5));
+  height: calc(var(--pixel-size) * 27);
+  width: calc(var(--pixel-size) * 18);
+  margin-top: calc(-9 * var(--pixel-size));
+  /* margin-left: calc(-6 * var(--pixel-size)); */
+  margin-bottom: calc((var(--pixel-size) * -26));
   transition: transform .5s cubic-bezier(.55,.06,.68,.19), box-shadow .5s;
   transform-style: preserve-3d;
+  transform: scale(0.6);
 }
 
 .card .front,
@@ -42,7 +46,7 @@
 .card:nth-child(5) { margin-left: calc((var(--pixel-size) * 2.0));}
 .card:nth-child(n+6) {
   margin-left: calc((var(--pixel-size) * 2.5));
-  margin-bottom: calc(var(--pixel-size) * -18);
+  margin-bottom: calc(var(--pixel-size) * -27);
 }
 
 .policies .card .front,
@@ -62,13 +66,21 @@
 
 
 .card.flip {
-  transform: translate(50%, -10%) rotateY(180deg);
+  transform: translate3d(calc(var(--pixel-size) * -30),calc(var(--pixel-size) * -10),0) rotateY(-179.9deg) scale(1);
   box-shadow: 0 0 var(--pixel-size) rgba(0, 0, 0, 0.2);
+}
+
+.policies .flip {
+  transform: translate3d(calc(var(--pixel-size) * -30),calc(var(--pixel-size) * 5),0) rotateY(-179.9deg) scale(1)
+}
+
+.blessings .flip {
+  transform: translate3d(calc(var(--pixel-size) * -50),0,0) rotateY(-179.9deg) scale(1)
 }
 
 .card .front {
   display: flex;
-  font-size: calc(var(--pixel-size) * 6);
+  font-size: calc(var(--pixel-size) * 10);
   user-select: none;
 }
 
@@ -91,5 +103,20 @@
   transform: rotateY(180deg);
   text-align: center;
   font-size: 0.8em;
-  font-family: sans-serif;
+  padding: 0 var(--pixel-size);
+  display: flex;
+  flex-direction: column;
+}
+
+.back p:first-child {
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 1px #0000007d;
+  margin: 1em -1em;
+}
+
+.card-option {
+	background: rgba(255, 255, 255, 0.2);
+	padding: 2px 7px;
+	margin: 0.5em -0.4em;
 }

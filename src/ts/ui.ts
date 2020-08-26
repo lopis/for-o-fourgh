@@ -32,9 +32,11 @@ function renderPlayerCards () {
   document.querySelector('.stats').innerHTML = players.map(
     player => `<div class="player">
       <div class="avatar char ${player.char}"></div>
-      <div class="text gold">${player.gold}</div>
-      <div class="text relics">${player.relics}</div>
-      <div class="text influence">${player.influence}</div>
+      <div>
+        <div class="text gold">${player.gold}</div>
+        <div class="text relics">${player.relics}</div>
+        <div class="text influence">${player.influence}</div>
+      <div>
     </div>`
   ).join('')
   applyTinyFont()
@@ -69,7 +71,11 @@ function renderActions (resolvePromise: Function) {
 
 function adjustUIScale () {
   const updatePixelSize = () => {
-    const smallestSize = Math.min(document.body.scrollHeight, document.body.scrollWidth - 150)
+    const smallestSize = Math.min(
+      document.documentElement.clientHeight,
+      document.documentElement.clientWidth - 150
+    )
+
     document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`)
   }
 
@@ -77,11 +83,28 @@ function adjustUIScale () {
   updatePixelSize()
 }
 
+function renderCard (card: Card, deck: DeckName) {
+  const cardElement = document.createElement('div')
+
+  cardElement.className = 'card'
+  cardElement.innerHTML = [
+    `<div class="front"></div>`,
+      `<div class="back">`,
+      `<p>${card.name}</p>`,
+      card.label ? `<p>${card.label}</p>` : '',
+      (card.options || []).map(option => `<p class="card-option">${option.name}</p>`).join(''),
+
+    `</div>`
+  ].join('')
+
+  document.querySelector(`.deck.${deck}`).append(cardElement)
+}
+
 function animateCardFlip (deckName: string) {
   const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card`)).pop()
 
   topCard.classList.add('flip')
-  setTimeout(() => {
-    topCard.parentElement.removeChild(topCard)
-  }, CARD_TIMEOUT)
+  // setTimeout(() => {
+  //   topCard.parentElement.removeChild(topCard)
+  // }, CARD_TIMEOUT)
 }

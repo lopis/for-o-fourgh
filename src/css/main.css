@@ -1,6 +1,7 @@
 html, body {
 	margin: 0;
-	height: 100%;
+  height: 100%;
+  display: block;
 }
 
 body {
@@ -12,6 +13,7 @@ body {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  font-family: "Ubuntu", "Twemoji Mozilla", sans-serif;
 
   --pixel-size: 10px;
   --dot-size: var(--pixel-size);

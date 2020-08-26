@@ -47,5 +47,6 @@ interface CardOption {
 interface Card {
   name: string,
   label?: string,
-  options?: CardOption[]
+  options?: CardOption[],
+  choosePlayer?: boolean
 }

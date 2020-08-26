@@ -4,7 +4,6 @@
 }
 
 .letter {
-  font-family: monospace;
   display: inline-flex;
   flex-wrap: wrap;
   width: calc(3 * var(--dot-width));
