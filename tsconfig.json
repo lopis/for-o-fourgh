@@ -6,7 +6,7 @@
   ],
   "compilerOptions": {
     "noImplicitAny": true,
-    "outFile": "main.js",
+    "outFile": "client.js",
     "module": "none",
     "removeComments": true,
     "target": "es6",
