@@ -1,5 +1,3 @@
-import * as io from "socket.io"
-
 let socket: SocketIO.Server
 
 /**
@@ -22,9 +20,7 @@ function bind() {
 /**
  * Client module init
  */
-function init() {
-    socket = io()
+function initClient () {
+    socket = window.io()
     bind();
 }
-
-window.addEventListener("load", init, false);

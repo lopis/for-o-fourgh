@@ -4,7 +4,7 @@
   "description": "For O'Fourgh",
   "main": "index.html",
   "scripts": {
-    "clean": "rm -rf build dist",
+    "clean": "rm -rf build dist public",
     "watch": "gulp --silent watch",
     "client": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"yarn watch\"",
     "dev": "gulp build-dev; concurrently \"yarn watch\" \"yarn start\"",

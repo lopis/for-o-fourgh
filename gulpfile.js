@@ -20,6 +20,7 @@ var regular = chalk.white;
 
 gulp.task('watch', (done) => {
 	gulp.watch('./src/ts/*.ts', gulp.series('build-dev'));
+	gulp.watch('./src/server/*.js', gulp.series('build-server-js-dev'));
 	gulp.watch('./src/html/**/*.html', gulp.series('build-dev'));
 	gulp.watch('./src/css/**/*.css', gulp.series('build-dev'));
 	gulp.watch('./src/assets/**/*', gulp.series('build-dev'));

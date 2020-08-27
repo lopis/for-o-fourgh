@@ -78,22 +78,22 @@ module.exports = {
 		const user = new User(socket);
     users.push(user);
 
-    users.forEach(user => {
-      user.updateUsers()
-    })
+    // users.forEach(user => {
+    //   user.updateUsers()
+    // })
 
     // TODO: what if more players join?
     // Lol I'm optimistic, yes
-    if (users.length >= 5) {
-      new Game(users).start()
-    }
+    // if (users.length >= 5) {
+    //   new Game(users).start()
+    // }
 
 		socket.on("disconnect", () => {
 			console.log("Disconnected: " + socket.id);
 			removeUser(user);
     });
 
-    socket.on("nextLocation", (player, location) => {
+    socket.on("nextLocation", ({player, location}) => {
 			console.log(`Player ${player} moves to ${location} next.`);
 		});
 

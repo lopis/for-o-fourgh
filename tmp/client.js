@@ -1,3 +1,19 @@
+let socket;
+function bind() {
+    socket.on("start", () => {
+        console.log("Start");
+    });
+    socket.on("connect", () => {
+        console.log("Waiting for opponent...");
+    });
+    socket.on("disconnect", () => {
+        console.log("Connection lost!");
+    });
+}
+function initClient() {
+    socket = window.io();
+    bind();
+}
 const CARD_COUNT = 5;
 const CARD_TIMEOUT = 5000;
 const BANK = 'bank';
@@ -444,6 +460,7 @@ window.onload = () => {
     applyTinyFont();
     gameStart();
     adjustUIScale();
+    initClient();
 };
 function shuffleArray(array) {
     for (let index = array.length - 1; index > 0; index--) {
