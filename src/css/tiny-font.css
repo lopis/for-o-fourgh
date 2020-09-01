@@ -26,14 +26,11 @@
 .letter > i {
   width: calc(1 * var(--dot-width));
   height: calc(1 * var(--dot-height));
-  /*border: calc(0.1 * var(--dot-height)) solid transparent;
-  margin: calc(-0.1 * var(--dot-height));*/
-  /* box-shadow: 0 0 calc(.1 * var(--dot-height)) calc(.1 * var(--dot-height)) currentColor; */
 }
 
 i[black] {
   background: currentColor;
-  box-shadow: 1px 0 0 0 currentColor, 0 1px 0 0 currentColor, 1px 1px 0 0 currentColor;
+  /* box-shadow: 1px 0 0 0 currentColor, 0 1px 0 0 currentColor, 1px 1px 0 0 currentColor; */
 }
 
 i:not([black]) {

@@ -135,11 +135,20 @@ module.exports = {
       }
 
       player.nextChoice = choice
-      players.forEach(player => player.updatePlayers())
+      if (players.every(player => player.nextChoice.location) || players.every(player => player.nextChoice.action)) {
+        players.forEach(player => player.updatePlayers())
+      }
     });
 
     socket.on("move", () => {
-      player.location = player.nextChoice.location
+      if (player.nextChoice.location) {
+        player.location = player.nextChoice.location
+        player.nextChoice.location = null
+      }
+    });
+
+    socket.on("resetChoice", () => {
+      player.nextChoice = {}
     });
 
 		console.log("Connected: " + socket.id);

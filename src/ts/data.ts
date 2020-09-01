@@ -3,6 +3,7 @@
 let players: Player[] = []
 let localPlayer: Player = null
 let playerStats: {[playerId: string]: PlayerStats} = {}
+let gameState: GameState = 'lobby'
 
 const locations: GameLocation[] = [
   BANK,
@@ -16,7 +17,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   bank: [{
     name: 'Interest Return',
     labels: ['💰 + 💰 / 5 ⚜️'],
-    effect: (player: Player) => {
+    effect(player: Player) {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.stats.gold += 1 + Math.floor(player.stats.influence / 5)
     },
@@ -27,7 +28,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Draw Policy',
       labels: ['draw 1 📜'],
-      effect: (player: Player) => {
+      effect(player: Player) {
         drawCard('policies')
       },
       disabled: () => false
@@ -35,7 +36,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Embezzlement',
       labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-      effect: (player: Player) => {
+      effect(player: Player) {
         player.stats.influence -= 1
         player.stats.gold += 2
         player.stats.relics += 1
@@ -48,7 +49,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Offering',
       labels: ['-1 🏺', '+3 ⚜️'],
-      effect: (player: Player) => {
+      effect(player: Player) {
         player.stats.influence += 3
         player.stats.relics -= 1
       },
@@ -57,7 +58,9 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Donation',
       labels: ['-1 💰', '+1 ⚜️'],
-      effect: (player: Player) => {
+      effect(player: Player) {
+        console.log('donation', player.char, player.id, JSON.stringify(player.stats), JSON.stringify(playerStats));
+
         player.stats.gold--
         player.stats.influence++
       },
@@ -66,7 +69,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Skip',
       labels: ['🙏'],
-      effect: (player: Player) => {},
+      effect(player: Player) {},
       disabled: () => false,
     }
   ],
@@ -75,7 +78,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Blessing',
       labels: ['draw 1 ✨'],
-      effect: (player: Player) => {
+      effect(player: Player) {
         drawCard('blessings')
       },
       disabled: () => false
@@ -86,7 +89,7 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Wrath',
       labels: ['draw 1 💢'],
-      effect: (player: Player) => {
+      effect(player: Player) {
         drawCard('damnations')
       },
       disabled: () => false

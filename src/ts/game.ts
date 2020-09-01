@@ -4,6 +4,7 @@
 
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
+    submitReset()
     renderButtons(
       'Go to',
       [BANK, COURT, TEMPLE, EDEN, HELL].map(
@@ -16,6 +17,7 @@ const promptNextLocation = () : Promise<null> => {
       'location',
       WAITING
     )
+
     applyTinyFont('.btn')
     resolve()
   })
@@ -62,7 +64,10 @@ const waitForPlayersActions = () : Promise<null> => {
 // Game applies action reward/price for all players
 const applyActionEffects = () : Promise<null> => {
   return new Promise((resolve) => {
+    console.log('applyActionEffects');
+
     players.forEach(player => {
+      console.log('#applyActionEffects', player.char);
       const nextAction = locationActions[player.location].find(
         action => action.name === player.nextChoice.action
       )

@@ -4,30 +4,32 @@ function renderButtons (
   type : ChoiceType,
   waitingTitle?: string
 ) {
-  document.querySelector('.actions .options').innerHTML = ''
-  options.map(option => {
-    const button = document.createElement('div')
-    button.innerHTML = option.html
-    button.className = 'btn'
+  requestAnimationFrame(() => {
+    document.querySelector('.actions .options').innerHTML = ''
+    options.map(option => {
+      const button = document.createElement('div')
+      button.innerHTML = option.html
+      button.className = 'btn'
 
-    if (!option.disabled) {
-      button.onmousedown = () => {
-        setPlayerChoice(option.title, type)
-        document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))
+      if (!option.disabled) {
+        button.onmousedown = () => {
+          setPlayerChoice(option.title, type)
+          document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))
 
-        button.classList.add('pressed')
-        if (waitingTitle) {
-          document.querySelector('.actions .title').innerHTML = waitingTitle
-          applyTinyFont('.actions .title')
+          button.classList.add('pressed')
+          if (waitingTitle) {
+            document.querySelector('.actions .title').innerHTML = waitingTitle
+            applyTinyFont('.actions .title')
+          }
         }
+      } else {
+        button.classList.add('disabled')
       }
-    } else {
-      button.classList.add('disabled')
-    }
-    document.querySelector('.actions .options').appendChild(button)
+      document.querySelector('.actions .options').appendChild(button)
+    })
+    document.querySelector('.actions .title').innerHTML = title
+    applyTinyFont('.actions .title')
   })
-  document.querySelector('.actions .title').innerHTML = title
-  applyTinyFont('.actions .title')
 }
 
 function renderMessages (messages: string[]) {
@@ -51,7 +53,7 @@ function renderPlayers () {
 function renderPlayerCards () {
   document.querySelector('.stats').innerHTML = players.map(
     player =>
-    `<div class="player">
+    `<div class="player ${player.id}">
       <div class="avatar char ${player.char}"></div>
       <div>
         <div class="text gold">${player.stats.gold}</div>
@@ -65,9 +67,9 @@ function renderPlayerCards () {
 
 function updatePlayerCards () {
   players.forEach(player => {
-    document.querySelector('.player .gold').innerHTML = `${player.stats.gold}`
-    document.querySelector('.player .relics').innerHTML = `${player.stats.relics}`
-    document.querySelector('.player .influence').innerHTML = `${player.stats.influence}`
+    document.querySelector(`.player.${player.id} .gold`).innerHTML = `${player.stats.gold}`
+    document.querySelector(`.player.${player.id} .relics`).innerHTML = `${player.stats.relics}`
+    document.querySelector(`.player.${player.id} .influence`).innerHTML = `${player.stats.influence}`
   })
   applyTinyFont()
 }
@@ -123,7 +125,7 @@ function animateCardFlip (deckName: string) {
   const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card`)).pop()
 
   topCard.classList.add('flip')
-  // setTimeout(() => {
-  //   topCard.parentElement.removeChild(topCard)
-  // }, CARD_TIMEOUT)
+  setTimeout(() => {
+    topCard.parentElement.removeChild(topCard)
+  }, CARD_TIMEOUT)
 }

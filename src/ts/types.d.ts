@@ -1,6 +1,7 @@
 type LocationName = 'bank' | 'court' | 'temple' | 'eden' | 'hell';
 type Character = 'devotee' | 'saint' | 'baal' | 'marx' | 'dissident'
 type DeckName = 'policies' | 'blessings' | 'damnations'
+type GameState = 'lobby' | 'start' | 'end'
 
 interface Player {
   name: string,

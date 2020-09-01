@@ -16,6 +16,7 @@ const letters: FontData = {
   "8": 0x7aaf,
   "9": 0x7bcb,
   "*": 0xaa8,
+  "-": 0x1c0,
 
   "a": 0x2b7d,
   "b": 0b111101110101111,

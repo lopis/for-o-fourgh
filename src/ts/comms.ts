@@ -5,8 +5,13 @@ let socket: SocketIO.Socket
  */
 function bind() {
   socket.on('start', () => {
-    resetPlayerChoice(localPlayer)
-    mainLoop();
+    if (gameState != 'start') {
+      gameState = 'start'
+      console.log('Game start');
+
+      resetPlayerChoice(localPlayer)
+      mainLoop();
+    }
  })
 
   socket.on('connect', () => {
@@ -22,7 +27,7 @@ function bind() {
     localPlayer = users.find(player => player.id === socket.id)
     players = users
     players.forEach(player => {
-      player.stats = playerStats[player.id] || DEFAULT_STATS
+      player.stats = playerStats[player.id] || {...DEFAULT_STATS}
       playerStats[player.id] = player.stats
     })
     renderPlayers()
@@ -48,5 +53,9 @@ function submitPlayerChoice (choice: Choice) {
 
 function submitMove () {
   socket.emit('move')
+}
+
+function submitReset () {
+  socket.emit('resetChoice')
 }
 
