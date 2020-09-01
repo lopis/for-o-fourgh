@@ -25,7 +25,7 @@ interface GameLocation {
 interface LocationOptions {
   name: string,
   labels: string[],
-  effect: () => void,
+  effect: (player: Player) => void,
   disabled: () => boolean,
 }
 

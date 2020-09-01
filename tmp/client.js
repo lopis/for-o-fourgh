@@ -65,8 +65,8 @@ const locationActions = {
     bank: [{
             name: 'Interest Return',
             labels: ['💰 + 💰 / 5 ⚜️'],
-            effect: () => {
-                localPlayer.stats.gold += 1 + Math.floor(localPlayer.stats.influence / 5);
+            effect: (player) => {
+                player.stats.gold += 1 + Math.floor(player.stats.influence / 5);
             },
             disabled: () => false
         }],
@@ -74,7 +74,7 @@ const locationActions = {
         {
             name: 'Draw Policy',
             labels: ['draw 1 📜'],
-            effect: () => {
+            effect: (player) => {
                 drawCard('policies');
             },
             disabled: () => false
@@ -82,10 +82,10 @@ const locationActions = {
         {
             name: 'Embezzlement',
             labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-            effect: () => {
-                localPlayer.stats.influence -= 1;
-                localPlayer.stats.gold += 2;
-                localPlayer.stats.relics += 1;
+            effect: (player) => {
+                player.stats.influence -= 1;
+                player.stats.gold += 2;
+                player.stats.relics += 1;
             },
             disabled: () => localPlayer.stats.influence < 1
         }
@@ -94,25 +94,25 @@ const locationActions = {
         {
             name: 'Offering',
             labels: ['-1 🏺', '+3 ⚜️'],
-            effect: () => {
-                localPlayer.stats.influence += 3;
-                localPlayer.stats.relics -= 1;
+            effect: (player) => {
+                player.stats.influence += 3;
+                player.stats.relics -= 1;
             },
             disabled: () => localPlayer.stats.relics < 1
         },
         {
             name: 'Donation',
             labels: ['-1 💰', '+1 ⚜️'],
-            effect: () => {
-                localPlayer.stats.gold--;
-                localPlayer.stats.influence++;
+            effect: (player) => {
+                player.stats.gold--;
+                player.stats.influence++;
             },
             disabled: () => localPlayer.stats.gold < 1
         },
         {
             name: 'Skip',
             labels: ['🙏'],
-            effect: () => { },
+            effect: (player) => { },
             disabled: () => false,
         }
     ],
@@ -120,7 +120,7 @@ const locationActions = {
         {
             name: 'Blessing',
             labels: ['draw 1 ✨'],
-            effect: () => {
+            effect: (player) => {
                 drawCard('blessings');
             },
             disabled: () => false
@@ -130,7 +130,7 @@ const locationActions = {
         {
             name: 'Wrath',
             labels: ['draw 1 💢'],
-            effect: () => {
+            effect: (player) => {
                 drawCard('damnations');
             },
             disabled: () => false
@@ -375,7 +375,7 @@ const applyActionEffects = () => {
         players.forEach(player => {
             const nextAction = locationActions[player.location].find(action => action.name === player.nextChoice.action);
             resetPlayerChoice(player);
-            nextAction.effect();
+            nextAction.effect(player);
             updatePlayerCards();
             resolve();
         });

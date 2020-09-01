@@ -68,7 +68,7 @@ const applyActionEffects = () : Promise<null> => {
       )
       resetPlayerChoice(player)
 
-      nextAction.effect()
+      nextAction.effect(player)
       updatePlayerCards()
 
       resolve()
