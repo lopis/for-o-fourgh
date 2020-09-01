@@ -1,14 +1,20 @@
-type LocationName = "bank" | "court" | "temple" | "eden" | "hell";
-type Character = "devotee" | "saint" | "baal" | "marx" | "dissident"
+type LocationName = 'bank' | 'court' | 'temple' | 'eden' | 'hell';
+type Character = 'devotee' | 'saint' | 'baal' | 'marx' | 'dissident'
+type DeckName = 'policies' | 'blessings' | 'damnations'
 
 interface Player {
   name: string,
+  id: string,
   char: Character,
+  stats: PlayerStats,
+  nextChoice: Choice,
+  location: LocationName
+}
+
+interface PlayerStats {
   gold: number,
   influence: number
   relics: number,
-  nextOption: string | null,
-  location: LocationName
 }
 
 interface GameLocation {
@@ -19,8 +25,8 @@ interface GameLocation {
 interface LocationOptions {
   name: string,
   labels: string[],
-  effect: (player: Player) => void,
-  disabled: (player: Player) => boolean,
+  effect: () => void,
+  disabled: () => boolean,
 }
 
 interface Game {
@@ -49,4 +55,12 @@ interface Card {
   label?: string,
   options?: CardOption[],
   choosePlayer?: boolean
+}
+
+type ChoiceType = 'location' | 'action' | 'option' | 'target'
+interface Choice {
+  location?: string,
+  action?: string,
+  option?: string,
+  target?: string
 }

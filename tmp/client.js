@@ -1,21 +1,48 @@
 let socket;
 function bind() {
-    socket.on("start", () => {
-        console.log("Start");
+    socket.on('start', () => {
+        resetPlayerChoice(localPlayer);
+        mainLoop();
     });
-    socket.on("connect", () => {
-        console.log("Waiting for opponent...");
+    socket.on('connect', () => {
+        console.log('Connected');
     });
-    socket.on("disconnect", () => {
-        console.log("Connection lost!");
+    socket.on('disconnect', () => {
+        console.log('Connection lost!');
+    });
+    socket.on('updatePlayers', (users) => {
+        console.log('updatePlayers', users);
+        localPlayer = users.find(player => player.id === socket.id);
+        players = users;
+        players.forEach(player => {
+            player.stats = playerStats[player.id] || DEFAULT_STATS;
+            playerStats[player.id] = player.stats;
+        });
+        renderPlayers();
+        renderPlayerCards();
     });
 }
 function initClient() {
     socket = window.io();
     bind();
 }
+function joinGame(name) {
+    socket.emit('join', name);
+}
+function submitPlayerChoice(choice) {
+    socket.emit('choice', choice);
+}
+function submitMove() {
+    socket.emit('move');
+}
 const CARD_COUNT = 5;
 const CARD_TIMEOUT = 5000;
+const WAITING = 'Waiting for others...';
+const DEFAULT_STATS = {
+    gold: 1,
+    influence: 0,
+    relics: 0
+};
 const BANK = 'bank';
 const COURT = 'court';
 const TEMPLE = 'temple';
@@ -24,7 +51,9 @@ const HELL = 'hell';
 const GOLD = 'gold';
 const INFLUENCE = 'influence';
 const RELICS = 'relics';
-const players = [];
+let players = [];
+let localPlayer = null;
+let playerStats = {};
 const locations = [
     BANK,
     COURT,
@@ -36,49 +65,49 @@ const locationActions = {
     bank: [{
             name: 'Interest Return',
             labels: ['💰 + 💰 / 5 ⚜️'],
-            effect: (player) => {
-                player.gold += 1 + Math.floor(player.influence / 5);
+            effect: () => {
+                localPlayer.stats.gold += 1 + Math.floor(localPlayer.stats.influence / 5);
             },
-            disabled: (player) => false
+            disabled: () => false
         }],
     court: [
         {
             name: 'Draw Policy',
             labels: ['draw 1 📜'],
-            effect: (player) => {
+            effect: () => {
                 drawCard('policies');
             },
-            disabled: (player) => false
+            disabled: () => false
         },
         {
             name: 'Embezzlement',
             labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-            effect: (player) => {
-                player.influence -= 1;
-                player.gold += 2;
-                player.relics += 1;
+            effect: () => {
+                localPlayer.stats.influence -= 1;
+                localPlayer.stats.gold += 2;
+                localPlayer.stats.relics += 1;
             },
-            disabled: (player) => player.influence < 1
+            disabled: () => localPlayer.stats.influence < 1
         }
     ],
     temple: [
         {
             name: 'Offering',
             labels: ['-1 🏺', '+3 ⚜️'],
-            effect: (player) => {
-                player.influence += 3;
-                player.relics -= 1;
+            effect: () => {
+                localPlayer.stats.influence += 3;
+                localPlayer.stats.relics -= 1;
             },
-            disabled: (player) => player.relics < 1
+            disabled: () => localPlayer.stats.relics < 1
         },
         {
             name: 'Donation',
             labels: ['-1 💰', '+1 ⚜️'],
-            effect: (player) => {
-                player.gold--;
-                player.influence++;
+            effect: () => {
+                localPlayer.stats.gold--;
+                localPlayer.stats.influence++;
             },
-            disabled: (player) => player.gold < 1
+            disabled: () => localPlayer.stats.gold < 1
         },
         {
             name: 'Skip',
@@ -91,20 +120,20 @@ const locationActions = {
         {
             name: 'Blessing',
             labels: ['draw 1 ✨'],
-            effect: (player) => {
+            effect: () => {
                 drawCard('blessings');
             },
-            disabled: (player) => false
+            disabled: () => false
         }
     ],
     hell: [
         {
             name: 'Wrath',
             labels: ['draw 1 💢'],
-            effect: (player) => {
+            effect: () => {
                 drawCard('damnations');
             },
-            disabled: (player) => false
+            disabled: () => false
         }
     ],
 };
@@ -162,22 +191,24 @@ const decks = {
 function updatePlayerLocation(resolve) {
     players.forEach(player => {
         const prevLocation = locations.find(l => l.name === player.location);
-        const nextLocation = locations.find(l => l.name === player.nextOption);
-        if (prevLocation)
-            prevLocation.players = prevLocation.players.filter(p => p.name !== player.name);
+        const nextLocation = locations.find(l => l.name === player.nextChoice.location);
         if (nextLocation) {
+            if (prevLocation) {
+                prevLocation.players = prevLocation.players.filter(p => p.name !== player.name);
+            }
             nextLocation.players.push(player);
             player.location = nextLocation.name;
         }
-        else {
+        else if (prevLocation) {
             prevLocation.players.push(player);
             player.location = prevLocation.name;
         }
-        player.nextOption = null;
+        resetPlayerChoice(player);
     });
     renderPlayers();
     renderPlayerCards();
-    resolve();
+    submitMove();
+    resolve && resolve();
 }
 function createCardDecks() {
     Object.entries(decks).forEach(([deckName, deck]) => {
@@ -194,15 +225,33 @@ function createCardDecks() {
 function drawCard(deckName) {
     animateCardFlip(deckName);
 }
-function showOptions(title, options) {
+function resetPlayerChoice(player) {
+    player.nextChoice = {
+        location: null,
+        action: null,
+        option: null,
+        target: null,
+    };
+}
+function setPlayerChoice(option, type) {
+    localPlayer.nextChoice[type] = option;
+    submitPlayerChoice(localPlayer.nextChoice);
+}
+function renderButtons(title, options, type, waitingTitle) {
     document.querySelector('.actions .options').innerHTML = '';
     options.map(option => {
         const button = document.createElement('div');
         button.innerHTML = option.html;
         button.className = 'btn';
         if (!option.disabled) {
-            button.onclick = () => {
-                players[0].nextOption = option.title;
+            button.onmousedown = () => {
+                setPlayerChoice(option.title, type);
+                document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'));
+                button.classList.add('pressed');
+                if (waitingTitle) {
+                    document.querySelector('.actions .title').innerHTML = waitingTitle;
+                    applyTinyFont('.actions .title');
+                }
             };
         }
         else {
@@ -212,6 +261,11 @@ function showOptions(title, options) {
     });
     document.querySelector('.actions .title').innerHTML = title;
     applyTinyFont('.actions .title');
+}
+function renderMessages(messages) {
+    document.querySelector('.actions .options').innerHTML = '';
+    document.querySelector('.actions .title').innerHTML = messages.map(message => `<div class="text">${message}</div>`).join('');
+    applyTinyFont('.actions .text');
 }
 function renderPlayers() {
     locations.forEach(location => {
@@ -224,31 +278,30 @@ function renderPlayerCards() {
     document.querySelector('.stats').innerHTML = players.map(player => `<div class="player">
       <div class="avatar char ${player.char}"></div>
       <div>
-        <div class="text gold">${player.gold}</div>
-        <div class="text relics">${player.relics}</div>
-        <div class="text influence">${player.influence}</div>
-      <div>
+        <div class="text gold">${player.stats.gold}</div>
+        <div class="text relics">${player.stats.relics}</div>
+        <div class="text influence">${player.stats.influence}</div>
+      </div>
     </div>`).join('');
     applyTinyFont();
 }
 function updatePlayerCards() {
     players.forEach(player => {
-        document.querySelector('.player .gold').innerHTML = `${player.gold}`;
-        document.querySelector('.player .relics').innerHTML = `${player.relics}`;
-        document.querySelector('.player .influence').innerHTML = `${player.influence}`;
+        document.querySelector('.player .gold').innerHTML = `${player.stats.gold}`;
+        document.querySelector('.player .relics').innerHTML = `${player.stats.relics}`;
+        document.querySelector('.player .influence').innerHTML = `${player.stats.influence}`;
     });
     applyTinyFont();
 }
 function renderActions(resolvePromise) {
-    const location = players[0].location;
+    const location = localPlayer.location;
     const actions = locationActions[location];
-    console.log('Render actions', actions);
-    showOptions('Choose an action', actions.map((action, index) => ({
+    renderButtons('Choose an action', actions.map((action, index) => ({
         title: action.name,
-        disabled: action.disabled(players[0]),
+        disabled: action.disabled(),
         html: `<div class="action-title">${index + 1}._${action.name}</div>
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
-    })));
+    })), 'action');
     applyTinyFont('.action-title');
     resolvePromise();
 }
@@ -279,27 +332,27 @@ function animateCardFlip(deckName) {
 }
 const promptNextLocation = () => {
     return new Promise((resolve) => {
-        showOptions('Go to', [BANK, COURT, TEMPLE, EDEN, HELL]
-            .map((location, idx) => ({
+        renderButtons('Go to', [BANK, COURT, TEMPLE, EDEN, HELL].map((location, idx) => ({
             title: location,
             html: `${idx + 1}._${location}`,
-            disabled: location === players[0].location
-        })));
+            disabled: location === localPlayer.location
+        })), 'location', WAITING);
         applyTinyFont('.btn');
         resolve();
     });
 };
-const waitForAllOptions = (resolvePromise) => {
-    if (players.every(player => player.nextOption)) {
+const waitForAllOptions = (type, resolvePromise) => {
+    if (players.every(player => player.nextChoice[type])) {
+        console.log('All ready', players.map(p => p.nextChoice));
         resolvePromise();
     }
     else {
-        requestAnimationFrame(() => waitForAllOptions(resolvePromise));
+        requestAnimationFrame(() => waitForAllOptions(type, resolvePromise));
     }
 };
 const waitForPlayersLocation = () => {
     return new Promise((resolve) => {
-        waitForAllOptions(resolve);
+        waitForAllOptions('location', resolve);
     });
 };
 const animatePlayers = () => {
@@ -314,15 +367,15 @@ const promptNextAction = () => {
 };
 const waitForPlayersActions = () => {
     return new Promise((resolve) => {
-        waitForAllOptions(resolve);
+        waitForAllOptions('action', resolve);
     });
 };
 const applyActionEffects = () => {
     return new Promise((resolve) => {
         players.forEach(player => {
-            const nextAction = locationActions[player.location].find(action => action.name === player.nextOption);
-            player.nextOption = null;
-            nextAction.effect(player);
+            const nextAction = locationActions[player.location].find(action => action.name === player.nextChoice.action);
+            resetPlayerChoice(player);
+            nextAction.effect();
             updatePlayerCards();
             resolve();
         });
@@ -347,29 +400,23 @@ const mainLoop = () => {
         .then(mainLoop);
 };
 function gameStart() {
-    players.push({
-        name: 'Player',
-        char: 'baal',
-        gold: 1,
-        influence: 0,
-        relics: 0,
-        nextOption: null,
-        location: BANK
-    });
     createCardDecks();
-    updatePlayerLocation(mainLoop);
+    requestAnimationFrame(() => {
+        const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`);
+        document.body.style.opacity = '1';
+        renderMessages([WAITING]);
+        joinGame(name);
+    });
 }
 window.onkeypress = (event) => {
     const key = event.key;
     if ('12345'.includes(key)) {
         const buttons = document.querySelectorAll(`.options .btn`);
         const index = parseInt(key);
-        console.log('click', index);
         if (index <= buttons.length) {
-            Array.from(buttons)[index - 1].classList.add('pressed');
             setTimeout(() => {
-                Array.from(buttons)[index - 1].click();
-            }, 200);
+                Array.from(buttons)[index - 1].onmousedown(null);
+            }, 100);
         }
     }
 };
@@ -440,9 +487,7 @@ function initTinyFont() {
     preRenderFont(wideLetters, 4);
     preRenderFont(narrowLetters, 1);
 }
-function applyTinyFont(selector = '.text') {
-    if (!tinyFontData['_a'])
-        return;
+function scheduleTinyFontUpdate(selector = '.text') {
     document.querySelectorAll(selector).forEach(element => {
         if (element.children.length === 0) {
             const text = element.innerHTML;
@@ -455,12 +500,17 @@ function applyTinyFont(selector = '.text') {
         element.classList.add('tiny-font');
     });
 }
+function applyTinyFont(selector = '.text') {
+    if (!tinyFontData['_a'])
+        return;
+    requestAnimationFrame(() => scheduleTinyFontUpdate(selector));
+}
 window.onload = () => {
     initTinyFont();
     applyTinyFont();
-    gameStart();
     adjustUIScale();
     initClient();
+    gameStart();
 };
 function shuffleArray(array) {
     for (let index = array.length - 1; index > 0; index--) {

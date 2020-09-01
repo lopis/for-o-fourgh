@@ -4,30 +4,37 @@
 
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    showOptions('Go to',
-      [BANK, COURT, TEMPLE, EDEN, HELL]
-      .map((location, idx) => ({
-        title: location,
-        html: `${idx + 1}._${location}`,
-        disabled: location === players[0].location
-      })))
+    renderButtons(
+      'Go to',
+      [BANK, COURT, TEMPLE, EDEN, HELL].map(
+        (location, idx) => ({
+          title: location,
+          html: `${idx + 1}._${location}`,
+          disabled: location === localPlayer.location
+        })
+      ),
+      'location',
+      WAITING
+    )
     applyTinyFont('.btn')
     resolve()
   })
 }
 
-const waitForAllOptions = (resolvePromise : Function) => {
-  if (players.every(player => player.nextOption)) {
+const waitForAllOptions = (type : ChoiceType, resolvePromise : Function) => {
+  if (players.every(player => player.nextChoice[type])) {
+    console.log('All ready', players.map(p => p.nextChoice));
+
     resolvePromise()
   } else {
-    requestAnimationFrame(() => waitForAllOptions(resolvePromise));
+    requestAnimationFrame(() => waitForAllOptions(type, resolvePromise));
   }
 }
 
 // Game waits for all players to chose, up to limit
 const waitForPlayersLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    waitForAllOptions(resolve)
+    waitForAllOptions('location', resolve)
   })
 }
 
@@ -45,10 +52,10 @@ const promptNextAction = () : Promise<null> => {
   })
 }
 
-// Wait for all players to pick their actions, up to limit
+// Wait for all players to pick their actions
 const waitForPlayersActions = () : Promise<null> => {
   return new Promise((resolve) => {
-    waitForAllOptions(resolve)
+    waitForAllOptions('action', resolve)
   })
 }
 
@@ -57,11 +64,11 @@ const applyActionEffects = () : Promise<null> => {
   return new Promise((resolve) => {
     players.forEach(player => {
       const nextAction = locationActions[player.location].find(
-        action => action.name === player.nextOption
+        action => action.name === player.nextChoice.action
       )
-      player.nextOption = null
+      resetPlayerChoice(player)
 
-      nextAction.effect(player)
+      nextAction.effect()
       updatePlayerCards()
 
       resolve()
@@ -97,17 +104,12 @@ const mainLoop = () => {
 }
 
 function gameStart () {
-  players.push({
-    name: 'Player',
-    char: 'baal',
-    gold: 1,
-    influence: 0,
-    relics: 0,
-    nextOption: null,
-    location: BANK
-  })
-
   createCardDecks()
 
-  updatePlayerLocation(mainLoop);
+  requestAnimationFrame(() => {
+    const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`)
+    document.body.style.opacity = '1'
+    renderMessages([WAITING])
+    joinGame(name)
+  });
 }

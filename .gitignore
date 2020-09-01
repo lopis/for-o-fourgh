@@ -5,3 +5,4 @@ dist
 *.sqlite
 server_example
 public
+tmp

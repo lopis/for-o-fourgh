@@ -77,9 +77,7 @@ function initTinyFont () {
   preRenderFont(narrowLetters, 1)
 }
 
-function applyTinyFont (selector: string | null = '.text') : void {
-  if (!tinyFontData['_a']) return
-
+function scheduleTinyFontUpdate (selector: string | null = '.text') : void {
   document.querySelectorAll(selector).forEach(element => {
     if (element.children.length === 0) {
       const text = element.innerHTML
@@ -92,4 +90,10 @@ function applyTinyFont (selector: string | null = '.text') : void {
 
     element.classList.add('tiny-font')
   })
+}
+
+function applyTinyFont (selector: string | null = '.text') : void {
+  if (!tinyFontData['_a']) return
+
+  requestAnimationFrame(() => scheduleTinyFontUpdate(selector))
 }

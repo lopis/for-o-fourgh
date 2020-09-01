@@ -1,6 +1,8 @@
 /// <reference path="./strings.ts" />
 
-const players: Player[] = []
+let players: Player[] = []
+let localPlayer: Player = null
+let playerStats: {[playerId: string]: PlayerStats} = {}
 
 const locations: GameLocation[] = [
   BANK,
@@ -14,31 +16,31 @@ const locationActions: {[name: string]: LocationOptions[]} = {
   bank: [{
     name: 'Interest Return',
     labels: ['💰 + 💰 / 5 ⚜️'],
-    effect: (player: Player) => {
+    effect: () => {
       // Get 1 Gold + 1 Gold per each 5 Influence
-      player.gold += 1 + Math.floor(player.influence / 5)
+      localPlayer.stats.gold += 1 + Math.floor(localPlayer.stats.influence / 5)
     },
-    disabled: (player: Player) => false
+    disabled: () => false
   }],
 
   court: [
     {
       name: 'Draw Policy',
       labels: ['draw 1 📜'],
-      effect: (player: Player) => {
+      effect: () => {
         drawCard('policies')
       },
-      disabled: (player: Player) => false
+      disabled: () => false
     },
     {
       name: 'Embezzlement',
       labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-      effect: (player: Player) => {
-        player.influence -= 1
-        player.gold += 2
-        player.relics += 1
+      effect: () => {
+        localPlayer.stats.influence -= 1
+        localPlayer.stats.gold += 2
+        localPlayer.stats.relics += 1
       },
-      disabled: (player: Player) => player.influence < 1
+      disabled: () => localPlayer.stats.influence < 1
     }
   ],
 
@@ -46,20 +48,20 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Offering',
       labels: ['-1 🏺', '+3 ⚜️'],
-      effect: (player: Player) => {
-        player.influence += 3
-        player.relics -= 1
+      effect: () => {
+        localPlayer.stats.influence += 3
+        localPlayer.stats.relics -= 1
       },
-      disabled: (player: Player) => player.relics < 1
+      disabled: () => localPlayer.stats.relics < 1
     },
     {
       name: 'Donation',
       labels: ['-1 💰', '+1 ⚜️'],
-      effect: (player: Player) => {
-        player.gold--
-        player.influence++
+      effect: () => {
+        localPlayer.stats.gold--
+        localPlayer.stats.influence++
       },
-      disabled: (player: Player) => player.gold < 1
+      disabled: () => localPlayer.stats.gold < 1
     },
     {
       name: 'Skip',
@@ -73,10 +75,10 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Blessing',
       labels: ['draw 1 ✨'],
-      effect: (player: Player) => {
+      effect: () => {
         drawCard('blessings')
       },
-      disabled: (player: Player) => false
+      disabled: () => false
     }
   ],
 
@@ -84,15 +86,13 @@ const locationActions: {[name: string]: LocationOptions[]} = {
     {
       name: 'Wrath',
       labels: ['draw 1 💢'],
-      effect: (player: Player) => {
+      effect: () => {
         drawCard('damnations')
       },
-      disabled: (player: Player) => false
+      disabled: () => false
     }
   ],
 }
-
-type DeckName = 'policies' | 'blessings' | 'damnations'
 
 const decks: {[name in DeckName]: Card[]}= {
   policies: [
@@ -146,28 +146,29 @@ const decks: {[name in DeckName]: Card[]}= {
   ]
 }
 
-
-function updatePlayerLocation (resolve : Function) {
+function updatePlayerLocation (resolve?: Function) {
   players.forEach(player => {
     const prevLocation = locations.find(l => l.name === player.location)
-    const nextLocation = locations.find(l => l.name === player.nextOption)
-    if (prevLocation)
-      prevLocation.players = prevLocation.players.filter(p => p.name !== player.name)
+    const nextLocation = locations.find(l => l.name === player.nextChoice.location)
 
     if (nextLocation) {
+      if (prevLocation) {
+        prevLocation.players = prevLocation.players.filter(p => p.name !== player.name)
+      }
       nextLocation.players.push(player)
       player.location = nextLocation.name
-    } else {
+    } else if (prevLocation) {
       prevLocation.players.push(player)
       player.location = prevLocation.name
     }
 
-    player.nextOption = null
+    resetPlayerChoice(player)
   })
-  renderPlayers();
+  renderPlayers()
   renderPlayerCards()
+  submitMove()
 
-  resolve()
+  resolve && resolve()
 }
 
 function createCardDecks () {
@@ -185,6 +186,21 @@ function createCardDecks () {
   })
 }
 
-function drawCard (deckName : 'policies' | 'blessings' | 'damnations') {
+function drawCard (deckName : DeckName) {
   animateCardFlip(deckName)
+}
+
+
+function resetPlayerChoice (player: Player) {
+  player.nextChoice = {
+    location: null,
+    action: null,
+    option: null,
+    target: null,
+  }
+}
+
+function setPlayerChoice (option: string, type: ChoiceType) {
+  localPlayer.nextChoice[type] = option
+  submitPlayerChoice(localPlayer.nextChoice)
 }

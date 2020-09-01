@@ -1,5 +1,6 @@
 .stats {
-	margin: calc(var(--pixel-size) * 1);
+  margin: calc(var(--pixel-size) * 1);
+  width: calc(var(--pixel-size) * 21);
 }
 
 .stats .player {

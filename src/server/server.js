@@ -1,17 +1,25 @@
 "use strict";
 
 /**
- * User sessions
- * @param {Array} users
+ * Player sessions
+ * @param {Array} players
  */
-const users = [];
+let players = [];
+let characters = ["saint", "baal", "marx", "dissident", "devotee"];
+let PLAYER_NUM = 2;
 
 /**
- * Remove user session
- * @param {User} user
+ * Remove player session
+ * @param {Player} player
  */
-function removeUser(user) {
-	users.splice(users.indexOf(user), 1);
+function removePlayer(player) {
+  players.splice(players.indexOf(player), 1);
+}
+
+function getChar() {
+  return characters.find(char => {
+    return !players.find(player => player.char === char)
+  })
 }
 
 /**
@@ -20,18 +28,18 @@ function removeUser(user) {
 class Game {
 
 	/**
-	 * @param {User[]} users
+	 * @param {Player[]} players
 	 */
-	constructor(users) {
-		this.users = users
+	constructor(players) {
+		this.players = players
 	}
 
 	/**
 	 * Start new game
 	 */
 	start() {
-		this.user1.start(this, this.user2);
-		this.user2.start(this, this.user1);
+		this.player1.start(this, this.player2);
+		this.player2.start(this, this.player1);
 	}
 
 	/**
@@ -50,20 +58,28 @@ class Game {
 }
 
 /**
- * User session class
+ * Player session class
  */
-class User {
+class Player {
 
 	/**
 	 * @param {Socket} socket
 	 */
 	constructor(socket) {
 		this.socket = socket;
-		this.game = null;
+    this.game = null;
 	}
 
-	updateUsers() {
-    this.socket.emit('updatePlayers', users);
+	updatePlayers() {
+    this.socket.emit('updatePlayers', players.map(
+      ({name, char, location, nextChoice = {}, socket}) => ({
+        name, char, location, nextChoice, id: socket.id
+      })
+    ));
+  }
+
+  startGame () {
+    this.socket.emit('start');
   }
 
 }
@@ -74,32 +90,57 @@ class User {
  */
 module.exports = {
 
-	io: (socket) => {
-		const user = new User(socket);
-    users.push(user);
+  // TODO: SANITATION OF ALL COMMANDS
+  // high risk of XSS
 
-    // users.forEach(user => {
-    //   user.updateUsers()
+	io: (socket) => {
+		const player = new Player(socket);
+    players.push(player);
+
+    // players.forEach(player => {
+    //   player.updatePlayers()
     // })
 
     // TODO: what if more players join?
     // Lol I'm optimistic, yes
-    // if (users.length >= 5) {
-    //   new Game(users).start()
+    // if (players.length >= 5) {
+    //   new Game(players).start()
     // }
 
-		socket.on("disconnect", () => {
-			console.log("Disconnected: " + socket.id);
-			removeUser(user);
+		socket.on("join", (name) => {
+      player.name = name;
+      player.char = getChar();
+      player.location = 'bank';
+			console.log(`Player ${socket.id} is called ${player.name} and is ${player.char}`);
+
+      players.forEach(player => player.updatePlayers())
+
+      if (players.length >= PLAYER_NUM) {
+        players.forEach(player => player.startGame())
+      }
     });
 
-    socket.on("nextLocation", ({player, location}) => {
-			console.log(`Player ${player} moves to ${location} next.`);
-		});
+		socket.on("disconnect", () => {
+      console.log("Disconnected: " + socket.id);
+      characters.push(player.char);
+			removePlayer(player);
+    });
 
-		socket.on("nextAction", (player, action, option = "default", targetPlayer = "self") => {
-			console.log(`Player ${player} performs "${action}" with ${option} to ${player}".`);
-		});
+		socket.on("choice", (choice) => {
+      const {location, action, option, target} = choice;
+      if (location) {
+        console.log(`Player ${player.name} goes to ${location}`);
+      } else {
+        console.log(`Player ${player.name} performs "${action}" with ${option} to ${target}".`);
+      }
+
+      player.nextChoice = choice
+      players.forEach(player => player.updatePlayers())
+    });
+
+    socket.on("move", () => {
+      player.location = player.nextChoice.location
+    });
 
 		console.log("Connected: " + socket.id);
   }

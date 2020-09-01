@@ -1,3 +1,3 @@
 interface Window {
-  io: () => SocketIO.Server
+  io: () => SocketIO.Socket
 }

@@ -1,4 +1,9 @@
-function showOptions (title : string, options : Option[]) {
+function renderButtons (
+  title : string,
+  options : Option[],
+  type : ChoiceType,
+  waitingTitle?: string
+) {
   document.querySelector('.actions .options').innerHTML = ''
   options.map(option => {
     const button = document.createElement('div')
@@ -6,8 +11,15 @@ function showOptions (title : string, options : Option[]) {
     button.className = 'btn'
 
     if (!option.disabled) {
-      button.onclick = () => {
-        players[0].nextOption = option.title
+      button.onmousedown = () => {
+        setPlayerChoice(option.title, type)
+        document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))
+
+        button.classList.add('pressed')
+        if (waitingTitle) {
+          document.querySelector('.actions .title').innerHTML = waitingTitle
+          applyTinyFont('.actions .title')
+        }
       }
     } else {
       button.classList.add('disabled')
@@ -16,6 +28,14 @@ function showOptions (title : string, options : Option[]) {
   })
   document.querySelector('.actions .title').innerHTML = title
   applyTinyFont('.actions .title')
+}
+
+function renderMessages (messages: string[]) {
+  document.querySelector('.actions .options').innerHTML = ''
+  document.querySelector('.actions .title').innerHTML = messages.map(
+    message => `<div class="text">${message}</div>`
+  ).join('')
+  applyTinyFont('.actions .text')
 }
 
 function renderPlayers () {
@@ -30,13 +50,14 @@ function renderPlayers () {
 
 function renderPlayerCards () {
   document.querySelector('.stats').innerHTML = players.map(
-    player => `<div class="player">
+    player =>
+    `<div class="player">
       <div class="avatar char ${player.char}"></div>
       <div>
-        <div class="text gold">${player.gold}</div>
-        <div class="text relics">${player.relics}</div>
-        <div class="text influence">${player.influence}</div>
-      <div>
+        <div class="text gold">${player.stats.gold}</div>
+        <div class="text relics">${player.stats.relics}</div>
+        <div class="text influence">${player.stats.influence}</div>
+      </div>
     </div>`
   ).join('')
   applyTinyFont()
@@ -44,27 +65,25 @@ function renderPlayerCards () {
 
 function updatePlayerCards () {
   players.forEach(player => {
-    document.querySelector('.player .gold').innerHTML = `${player.gold}`
-    document.querySelector('.player .relics').innerHTML = `${player.relics}`
-    document.querySelector('.player .influence').innerHTML = `${player.influence}`
+    document.querySelector('.player .gold').innerHTML = `${player.stats.gold}`
+    document.querySelector('.player .relics').innerHTML = `${player.stats.relics}`
+    document.querySelector('.player .influence').innerHTML = `${player.stats.influence}`
   })
   applyTinyFont()
 }
 
 function renderActions (resolvePromise: Function) {
-  const location = players[0].location
+  const location = localPlayer.location
   const actions = locationActions[location]
 
-  console.log('Render actions', actions)
-
-  showOptions('Choose an action', actions.map(
+  renderButtons('Choose an action', actions.map(
     (action, index) => ({
       title: action.name,
-      disabled: action.disabled(players[0]),
+      disabled: action.disabled(),
       html: `<div class="action-title">${index+1}._${action.name}</div>
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })
-  ))
+  ), 'action')
   applyTinyFont('.action-title')
   resolvePromise()
 }
