@@ -5,8 +5,9 @@
  * @param {Array} players
  */
 let players = [];
+let bots = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
-let PLAYER_NUM = 5;
+let PLAYER_NUM = 2;
 
 /**
  * Remove player session
@@ -16,9 +17,39 @@ function removePlayer(player) {
   players.splice(players.indexOf(player), 1);
 }
 
-function getChar() {
+function getChar () {
   return characters.find(char => {
     return !players.find(player => player.char === char)
+  })
+}
+
+function joinBotPlayer () {
+  const bot = new Player(null);
+  bot.name = 'Bot';
+  bot.isBot = true;
+  bot.char = getChar();
+  players.push(bot);
+  bots.push(bot);
+  console.log(`Bot joined the game`);
+}
+
+function removeBot () {
+  bots.forEach(bot => {
+    console.log('Bot left the game');
+    characters.push(bot.char);
+    removePlayer(bot);
+    bots.splice(bots.indexOf(bot), 1);
+  })
+}
+
+const locations = ['bank', 'court', 'temple', 'eden', 'hell'];
+function playBotLocation () {
+  bots.forEach(bot => {
+    const rnd = Math.round(Math.random() * (locations.length - 1));
+    const location = locations.filter(l => l !== bot.location)[rnd];
+    bot.nextChoice = {location}
+
+    console.log(`Bot goes to ${location}`);
   })
 }
 
@@ -68,18 +99,25 @@ class Player {
 	constructor(socket) {
 		this.socket = socket;
     this.game = null;
+    this.isBot = false;
+    this.id = socket ? socket.id : 'bot'
+    this.nextChoice = {}
 	}
 
 	updatePlayers() {
-    this.socket.emit('updatePlayers', players.map(
-      ({name, char, location, nextChoice = {}, socket}) => ({
-        name, char, location, nextChoice, id: socket.id
-      })
-    ));
+    if (this.socket) {
+      this.socket.emit('updatePlayers', players.map(
+        ({name, char, location, nextChoice = {}, id}) => ({
+          name, char, location, nextChoice, id
+        })
+      ));
+    }
   }
 
   startGame () {
-    this.socket.emit('start');
+    if (this.socket) {
+      this.socket.emit('start');
+    }
   }
 
 }
@@ -108,6 +146,7 @@ module.exports = {
     // }
 
 		socket.on("join", (name) => {
+      joinBotPlayer();
       player.name = name;
       player.char = getChar();
       player.location = 'bank';
@@ -121,6 +160,7 @@ module.exports = {
     });
 
 		socket.on("disconnect", () => {
+      removeBot();
       console.log("Disconnected: " + socket.id);
       characters.push(player.char);
 			removePlayer(player);
@@ -130,6 +170,7 @@ module.exports = {
       const {location, action, option, target} = choice;
       if (location) {
         console.log(`Player ${player.name} goes to ${location}`);
+        playBotLocation();
       } else {
         console.log(`Player ${player.name} performs "${action}" with ${option} to ${target}".`);
       }

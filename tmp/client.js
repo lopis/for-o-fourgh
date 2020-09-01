@@ -319,7 +319,7 @@ function renderActions(resolvePromise) {
 function adjustUIScale() {
     const updatePixelSize = () => {
         const smallestSize = Math.min(document.documentElement.clientHeight, document.documentElement.clientWidth - 150);
-        document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`);
+        document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 110)}px`);
     };
     window.onresize = updatePixelSize;
     updatePixelSize();
