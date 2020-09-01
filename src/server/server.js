@@ -6,7 +6,7 @@
  */
 let players = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
-let PLAYER_NUM = 2;
+let PLAYER_NUM = 5;
 
 /**
  * Remove player session
