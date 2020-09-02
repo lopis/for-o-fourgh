@@ -42,16 +42,45 @@ function removeBot () {
   })
 }
 
-const locations = ['bank', 'court', 'temple', 'eden', 'hell'];
-function playBotLocation () {
+function resetBotChoice () {
   bots.forEach(bot => {
-    const rnd = Math.round(Math.random() * (locations.length - 1));
-    const location = locations.filter(l => l !== bot.location)[rnd];
-    bot.nextChoice = {location}
-
-    console.log(`Bot goes to ${location}`);
+    bot.choice = {}
   })
 }
+
+const locations = ['bank', 'court', 'temple', 'eden', 'hell'];
+const actions = [
+  'Interest Return',
+  'Draw Policy',
+  'Embezzlement',
+  'Offering',
+  'Donation',
+  'Skip',
+  'Blessing',
+  'Wrath',
+]
+function getRandom (array, except) {
+  const rnd = Math.round(Math.random() * (array.length - 1));
+  return array.filter(l => l !== except)[rnd];
+}
+
+function playBotLocation () {
+  bots.forEach(bot => {
+    bot.nextChoice = {location: getRandom(locations, bot.location)}
+    console.log(`Bot goes to ${bot.nextChoice.location}`);
+  })
+}
+
+function playBotAction () {
+  bots.forEach(bot => {
+    bot.nextChoice = {
+      action: getRandom(actions, null)
+    };
+    console.log(`Bot performs ${bot.nextChoice.action}`);
+  })
+}
+
+
 
 /**
  * Game class
@@ -173,6 +202,7 @@ module.exports = {
         playBotLocation();
       } else {
         console.log(`Player ${player.name} performs "${action}" with ${option} to ${target}".`);
+        playBotAction();
       }
 
       player.nextChoice = choice
@@ -186,10 +216,12 @@ module.exports = {
         player.location = player.nextChoice.location
         player.nextChoice.location = null
       }
+      resetBotChoice();
     });
 
     socket.on("resetChoice", () => {
       player.nextChoice = {}
+      resetBotChoice();
     });
 
 		console.log("Connected: " + socket.id);

@@ -286,7 +286,7 @@ function renderPlayers() {
     });
 }
 function renderPlayerCards() {
-    document.querySelector('.stats').innerHTML = players.map(player => `<div class="player ${player.id}">
+    document.querySelector('.stats').innerHTML = players.map(player => `<div class="player ${player.char}">
       <div class="avatar char ${player.char}"></div>
       <div>
         <div class="text gold">${player.stats.gold}</div>
@@ -298,9 +298,9 @@ function renderPlayerCards() {
 }
 function updatePlayerCards() {
     players.forEach(player => {
-        document.querySelector(`.player.${player.id} .gold`).innerHTML = `${player.stats.gold}`;
-        document.querySelector(`.player.${player.id} .relics`).innerHTML = `${player.stats.relics}`;
-        document.querySelector(`.player.${player.id} .influence`).innerHTML = `${player.stats.influence}`;
+        document.querySelector(`.player.${player.char} .gold`).innerHTML = `${player.stats.gold}`;
+        document.querySelector(`.player.${player.char} .relics`).innerHTML = `${player.stats.relics}`;
+        document.querySelector(`.player.${player.char} .influence`).innerHTML = `${player.stats.influence}`;
     });
     applyTinyFont();
 }
