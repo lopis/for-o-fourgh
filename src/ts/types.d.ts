@@ -9,7 +9,7 @@ interface Player {
   char: Character,
   stats: PlayerStats,
   nextChoice: Choice,
-  location: LocationName
+  location: number, // Location Index
 }
 
 interface PlayerStats {
@@ -19,11 +19,12 @@ interface PlayerStats {
 }
 
 interface GameLocation {
+  index: number,
   name: LocationName,
   players: Player[]
 }
 
-interface LocationOptions {
+interface LocationOption {
   name: string,
   labels: string[],
   effect: (player: Player) => void,
@@ -59,9 +60,11 @@ interface Card {
 }
 
 type ChoiceType = 'location' | 'action' | 'option' | 'target'
+
+// The number is the choice index
 interface Choice {
-  location?: string,
-  action?: string,
-  option?: string,
-  target?: string
+  location?: number,
+  action?: number,
+  option?: number,
+  target?: number
 }

@@ -68,7 +68,7 @@ const locations = [
     TEMPLE,
     EDEN,
     HELL,
-].map((name) => ({ name: name, players: [] }));
+].map((name, index) => ({ index, name, players: [] }));
 const locationActions = {
     bank: [{
             name: 'Interest Return',
@@ -199,18 +199,18 @@ const decks = {
 };
 function updatePlayerLocation(resolve) {
     players.forEach(player => {
-        const prevLocation = locations.find(l => l.name === player.location);
-        const nextLocation = locations.find(l => l.name === player.nextChoice.location);
+        const prevLocation = locations[player.location];
+        const nextLocation = locations[player.nextChoice.location];
         if (nextLocation) {
             if (prevLocation) {
                 prevLocation.players = prevLocation.players.filter(p => p.name !== player.name);
             }
             nextLocation.players.push(player);
-            player.location = nextLocation.name;
+            player.location = locations.indexOf(nextLocation);
         }
         else if (prevLocation) {
             prevLocation.players.push(player);
-            player.location = prevLocation.name;
+            player.location = locations.indexOf(prevLocation);
         }
         resetPlayerChoice(player);
     });
@@ -242,20 +242,20 @@ function resetPlayerChoice(player) {
         target: null,
     };
 }
-function setPlayerChoice(option, type) {
-    localPlayer.nextChoice[type] = option;
+function setPlayerChoice(optionIndex, type) {
+    localPlayer.nextChoice[type] = optionIndex;
     submitPlayerChoice(localPlayer.nextChoice);
 }
 function renderButtons(title, options, type, waitingTitle) {
     requestAnimationFrame(() => {
         document.querySelector('.actions .options').innerHTML = '';
-        options.map(option => {
+        options.map((option, index) => {
             const button = document.createElement('div');
             button.innerHTML = option.html;
             button.className = 'btn';
             if (!option.disabled) {
                 button.onmousedown = () => {
-                    setPlayerChoice(option.title, type);
+                    setPlayerChoice(index, type);
                     document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'));
                     button.classList.add('pressed');
                     if (waitingTitle) {
@@ -306,7 +306,8 @@ function updatePlayerCards() {
 }
 function renderActions(resolvePromise) {
     const location = localPlayer.location;
-    const actions = locationActions[location];
+    const locationName = locations[location].name;
+    const actions = locationActions[locationName];
     renderButtons('Choose an action', actions.map((action, index) => ({
         title: action.name,
         disabled: action.disabled(),
@@ -347,10 +348,10 @@ function animateCardFlip(deckName) {
 const promptNextLocation = () => {
     return new Promise((resolve) => {
         submitReset();
-        renderButtons('Go to', [BANK, COURT, TEMPLE, EDEN, HELL].map((location, idx) => ({
-            title: location,
-            html: `${idx + 1}._${location}`,
-            disabled: location === localPlayer.location
+        renderButtons('Go to', locations.map(({ name, index }) => ({
+            title: name,
+            html: `${index + 1}._${name}`,
+            disabled: index === localPlayer.location
         })), 'location', WAITING);
         applyTinyFont('.btn');
         resolve();
@@ -390,7 +391,8 @@ const applyActionEffects = () => {
         console.log('applyActionEffects');
         players.forEach(player => {
             console.log('#applyActionEffects', player.char);
-            const nextAction = locationActions[player.location].find(action => action.name === player.nextChoice.action);
+            const locationName = locations[player.location].name;
+            const nextAction = locationActions[locationName][player.nextChoice.action];
             resetPlayerChoice(player);
             nextAction.effect(player);
             updatePlayerCards();

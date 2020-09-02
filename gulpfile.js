@@ -67,8 +67,11 @@ gulp.task('build-js', (done) => {
 });
 
 gulp.task('build-server-js', (done) => {
+  var tsProject = ts.createProject('tsconfig.json');
+
 	return gulp.src('./src/server/*.js')
-	.pipe(concat('server.js'))
+  .pipe(concat('server.js'))
+  .pipe(tsProject())
 	.pipe(uglify({
     mangle: {
       toplevel: true

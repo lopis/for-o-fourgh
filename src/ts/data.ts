@@ -11,9 +11,9 @@ const locations: GameLocation[] = [
   TEMPLE,
   EDEN,
   HELL,
-].map((name: LocationName) => ({name: name, players: []}))
+].map((name: LocationName, index: number) => ({index, name, players: []}))
 
-const locationActions: {[name: string]: LocationOptions[]} = {
+const locationActions: {[name in LocationName]: LocationOption[]} = {
   bank: [{
     name: 'Interest Return',
     labels: ['💰 + 💰 / 5 ⚜️'],
@@ -151,18 +151,18 @@ const decks: {[name in DeckName]: Card[]}= {
 
 function updatePlayerLocation (resolve?: Function) {
   players.forEach(player => {
-    const prevLocation = locations.find(l => l.name === player.location)
-    const nextLocation = locations.find(l => l.name === player.nextChoice.location)
+    const prevLocation: GameLocation = locations[player.location]
+    const nextLocation: GameLocation = locations[player.nextChoice.location]
 
     if (nextLocation) {
       if (prevLocation) {
         prevLocation.players = prevLocation.players.filter(p => p.name !== player.name)
       }
       nextLocation.players.push(player)
-      player.location = nextLocation.name
+      player.location = locations.indexOf(nextLocation)
     } else if (prevLocation) {
       prevLocation.players.push(player)
-      player.location = prevLocation.name
+      player.location = locations.indexOf(prevLocation)
     }
 
     resetPlayerChoice(player)
@@ -203,7 +203,7 @@ function resetPlayerChoice (player: Player) {
   }
 }
 
-function setPlayerChoice (option: string, type: ChoiceType) {
-  localPlayer.nextChoice[type] = option
+function setPlayerChoice (optionIndex: number, type: ChoiceType) {
+  localPlayer.nextChoice[type] = optionIndex
   submitPlayerChoice(localPlayer.nextChoice)
 }

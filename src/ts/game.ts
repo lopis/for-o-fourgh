@@ -7,11 +7,11 @@ const promptNextLocation = () : Promise<null> => {
     submitReset()
     renderButtons(
       'Go to',
-      [BANK, COURT, TEMPLE, EDEN, HELL].map(
-        (location, idx) => ({
-          title: location,
-          html: `${idx + 1}._${location}`,
-          disabled: location === localPlayer.location
+      locations.map(
+        ({name, index}) => ({
+          title: name,
+          html: `${index + 1}._${name}`,
+          disabled: index === localPlayer.location
         })
       ),
       'location',
@@ -68,9 +68,8 @@ const applyActionEffects = () : Promise<null> => {
 
     players.forEach(player => {
       console.log('#applyActionEffects', player.char);
-      const nextAction = locationActions[player.location].find(
-        action => action.name === player.nextChoice.action
-      )
+      const locationName = locations[player.location].name
+      const nextAction = locationActions[locationName][player.nextChoice.action]
       resetPlayerChoice(player)
 
       nextAction.effect(player)

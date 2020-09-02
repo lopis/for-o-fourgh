@@ -6,14 +6,14 @@ function renderButtons (
 ) {
   requestAnimationFrame(() => {
     document.querySelector('.actions .options').innerHTML = ''
-    options.map(option => {
+    options.map((option, index) => {
       const button = document.createElement('div')
       button.innerHTML = option.html
       button.className = 'btn'
 
       if (!option.disabled) {
         button.onmousedown = () => {
-          setPlayerChoice(option.title, type)
+          setPlayerChoice(index, type)
           document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))
 
           button.classList.add('pressed')
@@ -76,7 +76,8 @@ function updatePlayerCards () {
 
 function renderActions (resolvePromise: Function) {
   const location = localPlayer.location
-  const actions = locationActions[location]
+  const locationName: LocationName = locations[location].name
+  const actions: LocationOption[] = locationActions[locationName]
 
   renderButtons('Choose an action', actions.map(
     (action, index) => ({

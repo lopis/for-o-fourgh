@@ -1,34 +1,26 @@
 "use strict";
 
-/**
- * Player sessions
- * @param {Array} players
- */
-let players = [];
+let users = [];
 let bots = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
 let PLAYER_NUM = 2;
 
-/**
- * Remove player session
- * @param {Player} player
- */
-function removePlayer(player) {
-  players.splice(players.indexOf(player), 1);
+function removePlayer(user) {
+  users.splice(users.indexOf(user), 1);
 }
 
 function getChar () {
   return characters.find(char => {
-    return !players.find(player => player.char === char)
+    return !users.find(user => user.char === char)
   })
 }
 
 function joinBotPlayer () {
-  const bot = new Player(null);
+  const bot = new User(null);
   bot.name = 'Bot';
   bot.isBot = true;
   bot.char = getChar();
-  players.push(bot);
+  users.push(bot);
   bots.push(bot);
   console.log(`Bot joined the game`);
 }
@@ -48,7 +40,8 @@ function resetBotChoice () {
   })
 }
 
-const locations = ['bank', 'court', 'temple', 'eden', 'hell'];
+// TODO: use digits instead of strings to represent actions
+const locationsCount = ['bank', 'court', 'temple', 'eden', 'hell'];
 const actions = [
   'Interest Return',
   'Draw Policy',
@@ -80,62 +73,44 @@ function playBotAction () {
   })
 }
 
-
-
 /**
  * Game class
  */
 class Game {
 
-	/**
-	 * @param {Player[]} players
-	 */
-	constructor(players) {
-		this.players = players
-	}
+  users: User[]
 
 	/**
-	 * Start new game
+	 * @param {User[]} users
 	 */
-	start() {
-		this.player1.start(this, this.player2);
-		this.player2.start(this, this.player1);
+	constructor(users) {
+		this.users = users
 	}
-
-	/**
-	 * Is game ended
-	 * @return {boolean}
-	 */
-	ended() {
-	}
-
-	/**
-	 * Final score
-	 */
-	score() {
-	}
-
 }
 
 /**
  * Player session class
  */
-class Player {
+class User {
 
-	/**
-	 * @param {Socket} socket
-	 */
+  socket: SocketIO.Socket;
+  game: Game = null;
+  isBot: boolean = false;
+  id: string;
+  nextChoice: any = {};
+  name: string;
+  char: string;
+  location: number = 0;
+
 	constructor(socket) {
 		this.socket = socket;
-    this.game = null;
-    this.isBot = false;
     this.id = socket ? socket.id : 'bot'
-    this.nextChoice = {}
+    this.char = getChar()
 	}
 
-	updatePlayers() {
+	updateUsers() {
     if (this.socket) {
-      this.socket.emit('updatePlayers', players.map(
+      this.socket.emit('updateUsers', users.map(
         ({name, char, location, nextChoice = {}, id}) => ({
           name, char, location, nextChoice, id
         })
@@ -148,7 +123,6 @@ class Player {
       this.socket.emit('start');
     }
   }
-
 }
 
 /**
@@ -161,66 +135,54 @@ module.exports = {
   // high risk of XSS
 
 	io: (socket) => {
-		const player = new Player(socket);
-    players.push(player);
-
-    // players.forEach(player => {
-    //   player.updatePlayers()
-    // })
-
-    // TODO: what if more players join?
-    // Lol I'm optimistic, yes
-    // if (players.length >= 5) {
-    //   new Game(players).start()
-    // }
+		const user = new User(socket);
+    users.push(user);
 
 		socket.on("join", (name) => {
       joinBotPlayer();
-      player.name = name;
-      player.char = getChar();
-      player.location = 'bank';
-			console.log(`Player ${socket.id} is called ${player.name} and is ${player.char}`);
+      user.name = name;
+			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
 
-      players.forEach(player => player.updatePlayers())
+      users.forEach(user => user.updateUsers())
 
-      if (players.length >= PLAYER_NUM) {
-        players.forEach(player => player.startGame())
+      if (users.length >= PLAYER_NUM) {
+        users.forEach(user => user.startGame())
       }
     });
 
 		socket.on("disconnect", () => {
       removeBot();
       console.log("Disconnected: " + socket.id);
-      characters.push(player.char);
-			removePlayer(player);
+      characters.push(user.char);
+			removePlayer(user);
     });
 
 		socket.on("choice", (choice) => {
       const {location, action, option, target} = choice;
       if (location) {
-        console.log(`Player ${player.name} goes to ${location}`);
+        console.log(`Player ${user.name} goes to ${location}`);
         playBotLocation();
       } else {
-        console.log(`Player ${player.name} performs "${action}" with ${option} to ${target}".`);
+        console.log(`Player ${user.name} performs "${action}" with ${option} to ${target}".`);
         playBotAction();
       }
 
-      player.nextChoice = choice
-      if (players.every(player => player.nextChoice.location) || players.every(player => player.nextChoice.action)) {
-        players.forEach(player => player.updatePlayers())
+      user.nextChoice = choice
+      if (users.every(user => user.nextChoice.location) || users.every(user => user.nextChoice.action)) {
+        users.forEach(user => user.updateUsers())
       }
     });
 
     socket.on("move", () => {
-      if (player.nextChoice.location) {
-        player.location = player.nextChoice.location
-        player.nextChoice.location = null
+      if (user.nextChoice.location) {
+        user.location = user.nextChoice.location
+        user.nextChoice.location = null
       }
       resetBotChoice();
     });
 
     socket.on("resetChoice", () => {
-      player.nextChoice = {}
+      user.nextChoice = {}
       resetBotChoice();
     });
 
