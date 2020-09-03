@@ -63,7 +63,7 @@ function playBotAction () {
       option: getRandom(100),
       target: getRandomPlayer(bot)
     }
-    console.log(`Bot does ${bot.nextChoice.action} with ${bot.nextChoice.option} to player ${bot.nextChoice.target}`);
+    console.log(`Bot performs action ${bot.nextChoice.action}/${bot.nextChoice.option}/${bot.nextChoice.target}`);
   })
 }
 
@@ -164,7 +164,7 @@ module.exports = {
         console.log(`Player ${user.name} goes to ${location}`);
         playBotLocation();
       } else {
-        console.log(`Player ${user.name} performs "${action}" with ${option} to ${target}".`);
+        console.log(`Player ${user.name} performs action ${action}/${option}/${target}"`);
         playBotAction();
       }
 

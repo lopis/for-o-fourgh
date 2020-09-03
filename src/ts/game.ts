@@ -69,12 +69,14 @@ const applyActionEffects = () : Promise<null> => {
     players.forEach(player => {
       console.log('#applyActionEffects', player.char);
       const locationName = locations[player.location].name
+
+      // Normalizes value because bots use a random from 0 to 100
+      player.nextChoice.action = player.nextChoice.action % locationActions[locationName].length
+
       const nextAction = locationActions[locationName][player.nextChoice.action]
       resetPlayerChoice(player)
-
       nextAction.effect(player)
       updatePlayerCards()
-
       resolve()
     })
   })
@@ -83,7 +85,7 @@ const applyActionEffects = () : Promise<null> => {
 // Game shows the reward and price to all players openly
 const displayRewards = () : Promise<null> => {
   return new Promise((resolve) => {
-    
+
   })
 }
 
