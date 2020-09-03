@@ -6,14 +6,14 @@ function renderButtons (
 ) {
   requestAnimationFrame(() => {
     document.querySelector('.actions .options').innerHTML = ''
-    options.map(option => {
+    options.map((option, index) => {
       const button = document.createElement('div')
       button.innerHTML = option.html
       button.className = 'btn'
 
       if (!option.disabled) {
         button.onmousedown = () => {
-          setPlayerChoice(option.title, type)
+          setPlayerChoice(index + 1, type)
           document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))
 
           button.classList.add('pressed')
@@ -53,7 +53,7 @@ function renderPlayers () {
 function renderPlayerCards () {
   document.querySelector('.stats').innerHTML = players.map(
     player =>
-    `<div class="player ${player.id}">
+    `<div class="player ${player.char}">
       <div class="avatar char ${player.char}"></div>
       <div>
         <div class="text gold">${player.stats.gold}</div>
@@ -67,27 +67,44 @@ function renderPlayerCards () {
 
 function updatePlayerCards () {
   players.forEach(player => {
-    document.querySelector(`.player.${player.id} .gold`).innerHTML = `${player.stats.gold}`
-    document.querySelector(`.player.${player.id} .relics`).innerHTML = `${player.stats.relics}`
-    document.querySelector(`.player.${player.id} .influence`).innerHTML = `${player.stats.influence}`
+    document.querySelector(`.player.${player.char} .gold`).innerHTML = `${player.stats.gold}`
+    document.querySelector(`.player.${player.char} .relics`).innerHTML = `${player.stats.relics}`
+    document.querySelector(`.player.${player.char} .influence`).innerHTML = `${player.stats.influence}`
   })
   applyTinyFont()
 }
 
-function renderActions (resolvePromise: Function) {
+function renderLocations () {
+  renderButtons(
+    'Go to',
+    locations.map(
+      ({name, index}) => ({
+        title: name,
+        html: `${index}._${name}`,
+        disabled: index === localPlayer.location
+      })
+    ),
+    'location',
+    WAITING
+  )
+
+  applyTinyFont('.btn')
+}
+
+function renderActions () {
   const location = localPlayer.location
-  const actions = locationActions[location]
+  const locationName: LocationName = locations[location - 1].name
+  const actions: LocationOption[] = locationActions[locationName]
 
   renderButtons('Choose an action', actions.map(
     (action, index) => ({
       title: action.name,
-      disabled: action.disabled(),
-      html: `<div class="action-title">${index+1}._${action.name}</div>
+      disabled: action.disabled(localPlayer),
+      html: `<div class="action-title">${index + 1}._${action.name}</div>
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })
   ), 'action')
   applyTinyFont('.action-title')
-  resolvePromise()
 }
 
 function adjustUIScale () {
@@ -97,7 +114,7 @@ function adjustUIScale () {
       document.documentElement.clientWidth - 150
     )
 
-    document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 100)}px`)
+    document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 110)}px`)
   }
 
   window.onresize = updatePixelSize
@@ -122,7 +139,7 @@ function renderCard (card: Card, deck: DeckName) {
 }
 
 function animateCardFlip (deckName: string) {
-  const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card`)).pop()
+  const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card:not(.flip)`)).pop()
 
   topCard.classList.add('flip')
   setTimeout(() => {

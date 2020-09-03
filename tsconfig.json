@@ -1,12 +1,12 @@
 {
   "exclude": [
-      "node_modules",
-      "build",
-      "dist"
+    "node_modules",
+    "build",
+    "dist"
   ],
   "compilerOptions": {
     "noImplicitAny": true,
-    "outFile": "client.js",
+    "outFile": "output.js",
     "module": "none",
     "removeComments": true,
     "target": "es6",

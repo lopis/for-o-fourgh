@@ -19,8 +19,8 @@ var success = chalk.green;
 var regular = chalk.white;
 
 gulp.task('watch', (done) => {
-	gulp.watch('./src/ts/*.ts', gulp.series('build-dev'));
-	gulp.watch('./src/server/*.js', gulp.series('build-server-js-dev'));
+	gulp.watch('./src/ts/*.ts', gulp.series('js-dev'));
+	gulp.watch('./src/server/*.js', gulp.series('js-dev'));
 	gulp.watch('./src/html/**/*.html', gulp.series('build-dev'));
 	gulp.watch('./src/css/**/*.css', gulp.series('build-dev'));
 	gulp.watch('./src/assets/**/*', gulp.series('build-dev'));
@@ -46,17 +46,17 @@ gulp.task('build-ts', function () {
 
   return gulp.src('./src/ts/*.ts')
     .pipe(tsProject())
-    .pipe(gulp.dest('tmp'));
+    .pipe(gulp.dest('tmp/client/'));
 });
 
 gulp.task('build-js-dev', (done) => {
-	return gulp.src('./tmp/*.js')
+	return gulp.src('./tmp/client/*.js')
 	.pipe(concat('client.js'))
 	.pipe(gulp.dest('./public/'));
 });
 
 gulp.task('build-js', (done) => {
-	return gulp.src('./tmp/*.js')
+	return gulp.src('./tmp/client/*.js')
 	.pipe(concat('client.js'))
 	.pipe(uglify({
     mangle: {
@@ -66,8 +66,16 @@ gulp.task('build-js', (done) => {
 	.pipe(gulp.dest('./public/'));
 });
 
+gulp.task('build-server-ts', (done) => {
+  var tsProject = ts.createProject('tsconfig.json');
+
+	return gulp.src('./src/server/*.ts')
+  .pipe(tsProject())
+	.pipe(gulp.dest('./tmp/server/'));
+});
+
 gulp.task('build-server-js', (done) => {
-	return gulp.src('./src/server/*.js')
+	return gulp.src('./tmp/server/*.js')
 	.pipe(concat('server.js'))
 	.pipe(uglify({
     mangle: {
@@ -78,7 +86,7 @@ gulp.task('build-server-js', (done) => {
 });
 
 gulp.task('build-server-js-dev', (done) => {
-	return gulp.src('./src/server/*.js')
+  return gulp.src('./tmp/server/*.js')
 	.pipe(concat('server.js'))
 	.pipe(gulp.dest('./public/'));
 });
@@ -143,6 +151,17 @@ gulp.task('check', gulp.series('zip', (done) => {
 	done();
 }));
 
+gulp.task('js-dev', gulp.parallel(
+  gulp.series(
+    'build-ts',
+    'build-js-dev',
+  ),
+  gulp.series(
+    'build-server-ts',
+    'build-server-js-dev',
+  )
+));
+
 gulp.task('build-prod', gulp.series(
   gulp.parallel(
     'build-html',
@@ -154,15 +173,15 @@ gulp.task('build-prod', gulp.series(
     'build-js',
     'inject-css',
   ),
+  'build-server-ts',
   'build-server-js',
 	'check', //also zips,
 	(done) => {done();}
 ));
+
 gulp.task('build-dev', gulp.series(
-	'build-html',
-	'build-ts',
-  'build-js-dev',
-  'build-server-js-dev',
+  'build-html',
+  'js-dev',
   'build-css',
   'inject-css',
 	'copy-img',
