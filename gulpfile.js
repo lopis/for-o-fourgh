@@ -19,7 +19,8 @@ var success = chalk.green;
 var regular = chalk.white;
 
 gulp.task('watch', (done) => {
-	gulp.watch('./src/ts/*.ts', gulp.series('build-dev'));
+	gulp.watch('./src/ts/*.ts', gulp.series('js-dev'));
+	gulp.watch('./src/server/*.js', gulp.series('js-dev'));
 	gulp.watch('./src/html/**/*.html', gulp.series('build-dev'));
 	gulp.watch('./src/css/**/*.css', gulp.series('build-dev'));
 	gulp.watch('./src/assets/**/*', gulp.series('build-dev'));
@@ -40,46 +41,71 @@ gulp.task('init', (done) => {
 	});
 });
 
-gulp.task('build-js-dev', (done) => {
-	return gulp.src('./build/*.js')
-	.pipe(concat('main.js'))
-	.pipe(gulp.dest('./build/'));
-});
-
-gulp.task('build-js', (done) => {
-	return gulp.src('./build/*.js')
-	.pipe(concat('main.js'))
-	.pipe(uglify({
-    mangle: {
-      toplevel: true
-    },
-  }))
-	.pipe(gulp.dest('./build/'));
-});
-
 gulp.task('build-ts', function () {
   var tsProject = ts.createProject('tsconfig.json');
 
   return gulp.src('./src/ts/*.ts')
     .pipe(tsProject())
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest('tmp/client/'));
+});
+
+gulp.task('build-js-dev', (done) => {
+	return gulp.src('./tmp/client/*.js')
+	.pipe(concat('client.js'))
+	.pipe(gulp.dest('./public/'));
+});
+
+gulp.task('build-js', (done) => {
+	return gulp.src('./tmp/client/*.js')
+	.pipe(concat('client.js'))
+	.pipe(uglify({
+    mangle: {
+      toplevel: true
+    },
+  }))
+	.pipe(gulp.dest('./public/'));
+});
+
+gulp.task('build-server-ts', (done) => {
+  var tsProject = ts.createProject('tsconfig.json');
+
+	return gulp.src('./src/server/*.ts')
+  .pipe(tsProject())
+	.pipe(gulp.dest('./tmp/server/'));
+});
+
+gulp.task('build-server-js', (done) => {
+	return gulp.src('./tmp/server/*.js')
+	.pipe(concat('server.js'))
+	.pipe(uglify({
+    mangle: {
+      toplevel: true
+    },
+  }))
+	.pipe(gulp.dest('./public/'));
+});
+
+gulp.task('build-server-js-dev', (done) => {
+  return gulp.src('./tmp/server/*.js')
+	.pipe(concat('server.js'))
+	.pipe(gulp.dest('./public/'));
 });
 
 gulp.task('build-html', (done) => {
 	return gulp.src('./src/html/**/*.html')
 		.pipe(htmlmin({collapseWhitespace: true}))
-		.pipe(gulp.dest('./build/'));
+		.pipe(gulp.dest('./public/'));
 });
 
 gulp.task('build-css', (done) => {
 	return gulp.src('./src/css/**/*.css')
     .pipe(concatCss('style.css'))
     .pipe(cssmin())
-		.pipe(gulp.dest('./build/'));
+		.pipe(gulp.dest('./public/'));
 });
 gulp.task('inject-css', (done) => {
-  return gulp.src('./build/index.html')
-    .pipe(inject(gulp.src(['./build/style.css']), {
+  return gulp.src('./public/index.html')
+    .pipe(inject(gulp.src(['./public/style.css']), {
       removeTags: true,
       starttag: '/* inject:css */',
       endtag: '/* endinject */',
@@ -88,20 +114,20 @@ gulp.task('inject-css', (done) => {
         return file.contents.toString('utf8')
       }
     }))
-    .pipe(gulp.dest('./build'))
+    .pipe(gulp.dest('./public'))
 })
 
 
 gulp.task('copy-img', (done) => {
 	return gulp.src('./src/assets/**/*')
-		.pipe(gulp.dest('./build/'));
+		.pipe(gulp.dest('./public/'));
 });
 
 gulp.task('zip', (done) => {
 	return gulp.src([
-    './build/*.html',
-    './build/*.js',
-    './build/*.png',
+    './public/*.html',
+    './public/*.js',
+    './public/*.png',
   ])
 		.pipe(zip('entry.zip')) //gulp-zip performs compression by default
 		.pipe(gulp.dest('dist'));
@@ -110,20 +136,31 @@ gulp.task('zip', (done) => {
 gulp.task('build-img', () => {
   return gulp.src('src/assets/**')
     .pipe(imagemin())
-    .pipe(gulp.dest('build'));
+    .pipe(gulp.dest('public'));
 });
 
 gulp.task('check', gulp.series('zip', (done) => {
 	var stats = fs.statSync("./dist/entry.zip")
 	var fileSize = stats.size;
 	if (fileSize > 13312) {
-		console.log(error("Your zip compressed game is larger than 13kb (13312 bytes)!"))
-		console.log(regular("Your zip compressed game is " + fileSize + " bytes"));
+		console.log(error("Your game is larger than 13kb (13312 bytes)!"))
+		console.log(regular("Zip compressed, it is " + fileSize + " bytes"));
 	} else {
 		console.log(success("Your zip compressed game is " + fileSize + " bytes."));
 	}
 	done();
 }));
+
+gulp.task('js-dev', gulp.parallel(
+  gulp.series(
+    'build-ts',
+    'build-js-dev',
+  ),
+  gulp.series(
+    'build-server-ts',
+    'build-server-js-dev',
+  )
+));
 
 gulp.task('build-prod', gulp.series(
   gulp.parallel(
@@ -136,13 +173,15 @@ gulp.task('build-prod', gulp.series(
     'build-js',
     'inject-css',
   ),
+  'build-server-ts',
+  'build-server-js',
 	'check', //also zips,
 	(done) => {done();}
 ));
+
 gulp.task('build-dev', gulp.series(
-	'build-html',
-	'build-ts',
-	'build-js-dev',
+  'build-html',
+  'js-dev',
   'build-css',
   'inject-css',
 	'copy-img',

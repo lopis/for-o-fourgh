@@ -1,5 +1,6 @@
 .stats {
-	margin: calc(var(--pixel-size) * 1);
+  margin: calc(var(--pixel-size) * 1);
+  width: calc(var(--pixel-size) * 21);
 }
 
 .stats .player {
@@ -49,6 +50,6 @@
 
 .gold, .influence, .relics {
   color: #504c40;
-  font-size: 1.4em;
-  vertical-align: middle;
+  font-size: calc(var(--pixel-size) * 3);
+  line-height: 1;
 }

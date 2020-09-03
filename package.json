@@ -4,12 +4,13 @@
   "description": "For O'Fourgh",
   "main": "index.html",
   "scripts": {
-    "clean": "rm -rf build dist",
-    "dev": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"gulp build-dev\" \"gulp --silent watch\"",
-    "build": "gulp build-dev",
+    "clean": "rm -rf build dist public dist.zip tmp",
+    "watch": "gulp --silent watch",
+    "client": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"yarn watch\"",
+    "dev": "gulp build-dev; concurrently \"yarn watch\" \"yarn start\"",
     "prod": "yarn clean; gulp build-prod",
-    "gulp": "gulp",
-    "test": "jest"
+    "start": "node index.js",
+    "start:dev": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@babel/parser": "^7.11.3",
     "@babel/types": "^7.11.0",
+    "@types/socket.io": "^2.1.11",
     "beeper": "^2.0.0",
     "concurrently": "^5.3.0",
     "gulp": "^4.0.2",
@@ -35,5 +37,19 @@
     "gulp-zip": "^5.0.2",
     "mkdirp": "^1.0.4",
     "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "archiver": "^4.0.2",
+    "body-parser": "^1.19.0",
+    "chalk": "^4.1.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "mysql2": "^2.1.0",
+    "nodemon": "^2.0.4",
+    "pg": "^8.3.0",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.3.3",
+    "socket.io": "^2.3.0",
+    "sqlite3": "^5.0.0"
   }
 }

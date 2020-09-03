@@ -1,6 +1,7 @@
 .decks {
   display: flex;
   flex-direction: column;
+  width: calc(var(--pixel-size) * 18);
 }
 
 .deck {

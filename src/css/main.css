@@ -1,7 +1,6 @@
 html, body {
 	margin: 0;
   height: 100%;
-  display: block;
 }
 
 body {
@@ -14,6 +13,7 @@ body {
   align-items: center;
   overflow: hidden;
   font-family: "Ubuntu", "Twemoji Mozilla", sans-serif;
+  transition: opacity 100ms ease-in;
 
   --pixel-size: 10px;
   --dot-size: var(--pixel-size);

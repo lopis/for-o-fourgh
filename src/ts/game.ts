@@ -4,51 +4,49 @@
 
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    showOptions('Go to',
-      [BANK, COURT, TEMPLE, EDEN, HELL]
-      .map((location, idx) => ({
-        title: location,
-        html: `${idx + 1}._${location}`,
-        disabled: location === players[0].location
-      })))
-    applyTinyFont('.btn')
+    submitReset()
+    renderLocations()
     resolve()
   })
 }
 
-const waitForAllOptions = (resolvePromise : Function) => {
-  if (players.every(player => player.nextOption)) {
+const waitForAllOptions = (type : ChoiceType, resolvePromise : Function) => {
+  if (players.every(player => Number.isInteger(player.nextChoice[type]))) {
+    console.log('All ready', players.map(p => p.nextChoice));
+
     resolvePromise()
   } else {
-    requestAnimationFrame(() => waitForAllOptions(resolvePromise));
+    requestAnimationFrame(() => waitForAllOptions(type, resolvePromise));
   }
 }
 
 // Game waits for all players to chose, up to limit
 const waitForPlayersLocation = () : Promise<null> => {
   return new Promise((resolve) => {
-    waitForAllOptions(resolve)
+    waitForAllOptions('location', resolve)
   })
 }
 
 // Game plays animation of all players moving to next location
 const animatePlayers = () : Promise<null> => {
   return new Promise((resolve) => {
-    updatePlayerLocation(resolve)
+    updatePlayerLocation()
+    resolve()
   })
 }
 
 // Game shows possible actions to players
 const promptNextAction = () : Promise<null> => {
   return new Promise((resolve) => {
-    renderActions(resolve)
+    renderActions()
+    resolve()
   })
 }
 
-// Wait for all players to pick their actions, up to limit
+// Wait for all players to pick their actions
 const waitForPlayersActions = () : Promise<null> => {
   return new Promise((resolve) => {
-    waitForAllOptions(resolve)
+    waitForAllOptions('action', resolve)
   })
 }
 
@@ -56,14 +54,22 @@ const waitForPlayersActions = () : Promise<null> => {
 const applyActionEffects = () : Promise<null> => {
   return new Promise((resolve) => {
     players.forEach(player => {
-      const nextAction = locationActions[player.location].find(
-        action => action.name === player.nextOption
-      )
-      player.nextOption = null
+      const locationName = locations[player.location - 1].name
 
-      nextAction.effect(player)
+      // Normalizes value because bots use a random from 0 to 100
+      if (player.nextChoice.action > locationActions[locationName].length) {
+        player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
+      }
+
+      const nextAction = locationActions[locationName][player.nextChoice.action - 1]
+
+      console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
+      resetPlayerChoice(player)
+
+      if (!nextAction.disabled(player)) {
+        nextAction.effect(player)
+      }
       updatePlayerCards()
-
       resolve()
     })
   })
@@ -97,17 +103,12 @@ const mainLoop = () => {
 }
 
 function gameStart () {
-  players.push({
-    name: 'Player',
-    char: 'baal',
-    gold: 1,
-    influence: 0,
-    relics: 0,
-    nextOption: null,
-    location: BANK
-  })
-
   createCardDecks()
 
-  updatePlayerLocation(mainLoop);
+  requestAnimationFrame(() => {
+    const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`)
+    document.body.style.opacity = '1'
+    renderMessages([WAITING])
+    joinGame(name)
+  });
 }
