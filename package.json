@@ -8,7 +8,7 @@
     "watch": "gulp --silent watch",
     "client": "concurrently \"cd build; python -m SimpleHTTPServer 5555\" \"yarn watch\"",
     "dev": "gulp build-dev; concurrently \"yarn watch\" \"yarn start\"",
-    "prod": "yarn clean; gulp build-prod",
+    "build": "yarn clean; gulp build-prod",
     "start": "node index.js",
     "start:dev": "nodemon"
   },
