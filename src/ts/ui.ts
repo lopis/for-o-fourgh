@@ -99,7 +99,7 @@ function renderActions () {
   renderButtons('Choose an action', actions.map(
     (action, index) => ({
       title: action.name,
-      disabled: action.disabled(),
+      disabled: action.disabled(localPlayer),
       html: `<div class="action-title">${index + 1}._${action.name}</div>
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })

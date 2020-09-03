@@ -21,7 +21,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.stats.gold += 1 + Math.floor(player.stats.influence / 5)
     },
-    disabled: () => false
+    disabled: (player: Player) => false
   }],
 
   court: [
@@ -31,7 +31,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
       effect(player: Player) {
         drawCard('policies')
       },
-      disabled: () => false
+      disabled: (player: Player) => false
     },
     {
       name: 'Embezzlement',
@@ -41,7 +41,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
         player.stats.gold += 2
         player.stats.relics += 1
       },
-      disabled: () => localPlayer.stats.influence < 1
+      disabled: (player: Player) => player.stats.influence < 1
     }
   ],
 
@@ -53,7 +53,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
         player.stats.influence += 3
         player.stats.relics -= 1
       },
-      disabled: () => localPlayer.stats.relics < 1
+      disabled: (player: Player) => player.stats.relics < 1
     },
     {
       name: 'Donation',
@@ -62,12 +62,12 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
         player.stats.gold--
         player.stats.influence++
       },
-      disabled: () => localPlayer.stats.gold < 1
+      disabled: (player: Player) => player.stats.gold < 1
     },
     {
       name: 'Skip',
       labels: ['🙏'],
-      effect(player: Player) {},
+      effect() {},
       disabled: () => false,
     }
   ],
@@ -76,7 +76,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
     {
       name: 'Blessing',
       labels: ['draw 1 ✨'],
-      effect(player: Player) {
+      effect() {
         drawCard('blessings')
       },
       disabled: () => false

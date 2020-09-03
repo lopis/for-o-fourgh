@@ -57,13 +57,18 @@ const applyActionEffects = () : Promise<null> => {
       const locationName = locations[player.location - 1].name
 
       // Normalizes value because bots use a random from 0 to 100
-      player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
+      if (player.nextChoice.action > locationActions[locationName].length) {
+        player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
+      }
 
       const nextAction = locationActions[locationName][player.nextChoice.action - 1]
+
       console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
       resetPlayerChoice(player)
 
-      nextAction.effect(player)
+      if (!nextAction.disabled(player)) {
+        nextAction.effect(player)
+      }
       updatePlayerCards()
       resolve()
     })
