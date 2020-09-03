@@ -48,6 +48,8 @@ function joinGame (name: string) {
 }
 
 function submitPlayerChoice (choice: Choice) {
+  console.log('Submit choice', {...choice});
+
   socket.emit('choice', choice)
 }
 

@@ -11,7 +11,7 @@ const locations: GameLocation[] = [
   TEMPLE,
   EDEN,
   HELL,
-].map((name: LocationName, index: number) => ({index, name, players: []}))
+].map((name: LocationName, index: number) => ({index: index+1, name, players: []}))
 
 const locationActions: {[name in LocationName]: LocationOption[]} = {
   bank: [{
@@ -59,8 +59,6 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
       name: 'Donation',
       labels: ['-1 💰', '+1 ⚜️'],
       effect(player: Player) {
-        console.log('donation', player.char, player.id, JSON.stringify(player.stats), JSON.stringify(playerStats));
-
         player.stats.gold--
         player.stats.influence++
       },
@@ -149,20 +147,20 @@ const decks: {[name in DeckName]: Card[]}= {
   ]
 }
 
-function updatePlayerLocation (resolve?: Function) {
+function updatePlayerLocation () {
   players.forEach(player => {
-    const prevLocation: GameLocation = locations[player.location]
-    const nextLocation: GameLocation = locations[player.nextChoice.location]
+    const prevLocation: GameLocation = locations[player.location - 1]
+    const nextLocation: GameLocation = locations[player.nextChoice.location - 1]
 
     if (nextLocation) {
       if (prevLocation) {
         prevLocation.players = prevLocation.players.filter(p => p.name !== player.name)
       }
       nextLocation.players.push(player)
-      player.location = locations.indexOf(nextLocation)
+      player.location = locations.indexOf(nextLocation) + 1
     } else if (prevLocation) {
       prevLocation.players.push(player)
-      player.location = locations.indexOf(prevLocation)
+      player.location = locations.indexOf(prevLocation) + 1
     }
 
     resetPlayerChoice(player)
@@ -170,8 +168,6 @@ function updatePlayerLocation (resolve?: Function) {
   renderPlayers()
   renderPlayerCards()
   submitMove()
-
-  resolve && resolve()
 }
 
 function createCardDecks () {

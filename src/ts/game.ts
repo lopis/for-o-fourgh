@@ -5,26 +5,13 @@
 const promptNextLocation = () : Promise<null> => {
   return new Promise((resolve) => {
     submitReset()
-    renderButtons(
-      'Go to',
-      locations.map(
-        ({name, index}) => ({
-          title: name,
-          html: `${index + 1}._${name}`,
-          disabled: index === localPlayer.location
-        })
-      ),
-      'location',
-      WAITING
-    )
-
-    applyTinyFont('.btn')
+    renderLocations()
     resolve()
   })
 }
 
 const waitForAllOptions = (type : ChoiceType, resolvePromise : Function) => {
-  if (players.every(player => player.nextChoice[type])) {
+  if (players.every(player => Number.isInteger(player.nextChoice[type]))) {
     console.log('All ready', players.map(p => p.nextChoice));
 
     resolvePromise()
@@ -43,14 +30,16 @@ const waitForPlayersLocation = () : Promise<null> => {
 // Game plays animation of all players moving to next location
 const animatePlayers = () : Promise<null> => {
   return new Promise((resolve) => {
-    updatePlayerLocation(resolve)
+    updatePlayerLocation()
+    resolve()
   })
 }
 
 // Game shows possible actions to players
 const promptNextAction = () : Promise<null> => {
   return new Promise((resolve) => {
-    renderActions(resolve)
+    renderActions()
+    resolve()
   })
 }
 
@@ -64,17 +53,16 @@ const waitForPlayersActions = () : Promise<null> => {
 // Game applies action reward/price for all players
 const applyActionEffects = () : Promise<null> => {
   return new Promise((resolve) => {
-    console.log('applyActionEffects');
-
     players.forEach(player => {
-      console.log('#applyActionEffects', player.char);
-      const locationName = locations[player.location].name
+      const locationName = locations[player.location - 1].name
 
       // Normalizes value because bots use a random from 0 to 100
-      player.nextChoice.action = player.nextChoice.action % locationActions[locationName].length
+      player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
 
-      const nextAction = locationActions[locationName][player.nextChoice.action]
+      const nextAction = locationActions[locationName][player.nextChoice.action - 1]
+      console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
       resetPlayerChoice(player)
+
       nextAction.effect(player)
       updatePlayerCards()
       resolve()

@@ -4,6 +4,7 @@ let users: User[] = [];
 let bots: User[] = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
 let PLAYER_NUM = 2;
+const BANK_LOCATION = 1;
 
 function removePlayer(user: User) {
   users.splice(users.indexOf(user), 1);
@@ -31,6 +32,12 @@ function removeBot () {
     characters.push(bot.char);
     removePlayer(bot);
     bots.splice(bots.indexOf(bot), 1);
+  })
+}
+
+function setBotLocation () {
+  bots.forEach(bot => {
+    bot.location = bot.nextChoice.location || bot.location
   })
 }
 
@@ -69,7 +76,7 @@ function playBotAction () {
 
 function playBotLocation () {
   bots.forEach(bot => {
-    bot.nextChoice = {location: getRandom(locationsCount - 1)}
+    bot.nextChoice = {location: getRandom(locationsCount - 1) + 1}
     console.log(`Bot goes to ${bot.nextChoice.location}`);
   })
 }
@@ -101,7 +108,7 @@ class User {
   nextChoice: any = {};
   name: string;
   char: string;
-  location: number = 0;
+  location: number = BANK_LOCATION;
 
 	constructor(socket: SocketIO.Socket) {
 		this.socket = socket;
@@ -160,7 +167,7 @@ module.exports = {
 
 		socket.on("choice", (choice) => {
       const {location, action, option, target} = choice;
-      if (location) {
+      if (Number.isInteger(location)) {
         console.log(`Player ${user.name} goes to ${location}`);
         playBotLocation();
       } else {
@@ -179,7 +186,7 @@ module.exports = {
         user.location = user.nextChoice.location
         user.nextChoice.location = null
       }
-      resetBotChoice();
+      setBotLocation();
     });
 
     socket.on("resetChoice", () => {

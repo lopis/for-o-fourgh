@@ -1,3 +1,4 @@
+const NULL = 'null'
 const BANK = 'bank'
 const COURT = 'court'
 const TEMPLE = 'temple'
