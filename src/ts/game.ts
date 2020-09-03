@@ -83,7 +83,7 @@ const applyActionEffects = () : Promise<null> => {
 // Game shows the reward and price to all players openly
 const displayRewards = () : Promise<null> => {
   return new Promise((resolve) => {
-
+    
   })
 }
 

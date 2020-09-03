@@ -22,8 +22,8 @@ function bind() {
     console.log('Connection lost!')
   })
 
-  socket.on('updatePlayers', (users: Player[]) => {
-    console.log('updatePlayers', users)
+  socket.on('updateUsers', (users: Player[]) => {
+    console.log('updateUsers', users.map(u => u.nextChoice))
     localPlayer = users.find(player => player.id === socket.id)
     players = users
     players.forEach(player => {

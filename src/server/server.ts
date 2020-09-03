@@ -1,11 +1,11 @@
 "use strict";
 
-let users = [];
-let bots = [];
+let users: User[] = [];
+let bots: User[] = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
 let PLAYER_NUM = 2;
 
-function removePlayer(user) {
+function removePlayer(user: User) {
   users.splice(users.indexOf(user), 1);
 }
 
@@ -36,40 +36,41 @@ function removeBot () {
 
 function resetBotChoice () {
   bots.forEach(bot => {
-    bot.choice = {}
+    bot.nextChoice = {}
   })
 }
 
 // TODO: use digits instead of strings to represent actions
-const locationsCount = ['bank', 'court', 'temple', 'eden', 'hell'];
-const actions = [
-  'Interest Return',
-  'Draw Policy',
-  'Embezzlement',
-  'Offering',
-  'Donation',
-  'Skip',
-  'Blessing',
-  'Wrath',
-]
-function getRandom (array, except) {
-  const rnd = Math.round(Math.random() * (array.length - 1));
-  return array.filter(l => l !== except)[rnd];
+const locationsCount = 5;
+
+function getRandom (max: number) {
+  return Math.round(Math.random() * max)
 }
 
-function playBotLocation () {
-  bots.forEach(bot => {
-    bot.nextChoice = {location: getRandom(locations, bot.location)}
-    console.log(`Bot goes to ${bot.nextChoice.location}`);
-  })
+function getRandomPlayer (except: User): number {
+  let rnd = getRandom(users.length - 1)
+  if (users[rnd] === except) {
+    return getRandomPlayer(except)
+  }
+
+  return rnd
 }
 
 function playBotAction () {
   bots.forEach(bot => {
     bot.nextChoice = {
-      action: getRandom(actions, null)
-    };
-    console.log(`Bot performs ${bot.nextChoice.action}`);
+      action: getRandom(100),
+      option: getRandom(100),
+      target: getRandomPlayer(bot)
+    }
+    console.log(`Bot does ${bot.nextChoice.action} with ${bot.nextChoice.option} to player ${bot.nextChoice.target}`);
+  })
+}
+
+function playBotLocation () {
+  bots.forEach(bot => {
+    bot.nextChoice = {location: getRandom(locationsCount - 1)}
+    console.log(`Bot goes to ${bot.nextChoice.location}`);
   })
 }
 
@@ -83,7 +84,7 @@ class Game {
 	/**
 	 * @param {User[]} users
 	 */
-	constructor(users) {
+	constructor(users: User[]) {
 		this.users = users
 	}
 }
@@ -102,7 +103,7 @@ class User {
   char: string;
   location: number = 0;
 
-	constructor(socket) {
+	constructor(socket: SocketIO.Socket) {
 		this.socket = socket;
     this.id = socket ? socket.id : 'bot'
     this.char = getChar()
@@ -134,11 +135,11 @@ module.exports = {
   // TODO: SANITATION OF ALL COMMANDS
   // high risk of XSS
 
-	io: (socket) => {
+	io: (socket: SocketIO.Socket) => {
 		const user = new User(socket);
     users.push(user);
 
-		socket.on("join", (name) => {
+		socket.on("join", (name: string) => {
       joinBotPlayer();
       user.name = name;
 			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
@@ -168,7 +169,7 @@ module.exports = {
       }
 
       user.nextChoice = choice
-      if (users.every(user => user.nextChoice.location) || users.every(user => user.nextChoice.action)) {
+      if (users.every(user => Number.isInteger(user.nextChoice.location)) || users.every(user => Number.isInteger(user.nextChoice.action))) {
         users.forEach(user => user.updateUsers())
       }
     });
