@@ -59,3 +59,7 @@
 .disabled::before {
 	opacity: 0.7;
 }
+
+.btn .char {
+  margin-top: calc(var(--pixel-size) * 1);
+}

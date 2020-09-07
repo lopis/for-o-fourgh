@@ -47,10 +47,12 @@ function joinGame (name: string) {
   socket.emit('join', name)
 }
 
-function submitPlayerChoice (choice: Choice) {
+function submitPlayerChoice (resolve: Function) {
+  const choice: Choice = localPlayer.nextChoice
   console.log('Submit choice', {...choice});
 
   socket.emit('choice', choice)
+  resolve()
 }
 
 function submitMove () {

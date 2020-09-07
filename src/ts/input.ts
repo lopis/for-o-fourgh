@@ -6,7 +6,10 @@ window.onkeypress = (event: KeyboardEvent) => {
     const index = parseInt(key)
     if (index <= buttons.length) {
       setTimeout(() => {
-        Array.from(buttons)[index - 1].onmousedown(null)
+        const selectButton = Array.from(buttons)[index - 1]
+        if (selectButton.onmousedown) {
+          selectButton.onmousedown(null)
+        }
       }, 100);
     }
   }

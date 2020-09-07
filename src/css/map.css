@@ -4,8 +4,6 @@
   animation: map 2s infinite;
   height: calc(var(--pixel-size) * 64);
   width: calc(var(--pixel-size) * 64);
-  image-rendering: pixelated;
-  image-rendering: optimizespeed;
   position: relative;
   border: var(--pixel-size) solid #c4bfb0;
   margin: calc(2 * var(--pixel-size)) 0;
@@ -85,6 +83,9 @@
   height: calc(var(--pixel-size) * 9);
   width: calc(var(--pixel-size) * 4);
   display: inline-block;
+}
+
+.map .char {
   margin-right: calc(var(--pixel-size) * 1);
 }
 

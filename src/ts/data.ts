@@ -4,6 +4,7 @@ let players: Player[] = []
 let localPlayer: Player = null
 let playerStats: {[playerId: string]: PlayerStats} = {}
 let gameState: GameState = 'lobby'
+let cards: {[deckName: string]: Card[]} = {}
 
 const locations: GameLocation[] = [
   BANK,
@@ -13,11 +14,11 @@ const locations: GameLocation[] = [
   HELL,
 ].map((name: LocationName, index: number) => ({index: index+1, name, players: []}))
 
-const locationActions: {[name in LocationName]: LocationOption[]} = {
+const locationActions: {[name in LocationName]: LocationAction[]} = {
   bank: [{
     name: 'Interest Return',
     labels: ['💰 + 💰 / 5 ⚜️'],
-    effect(player: Player) {
+    effect (player: Player) {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.stats.gold += 1 + Math.floor(player.stats.influence / 5)
     },
@@ -27,16 +28,17 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
   court: [
     {
       name: 'Draw Policy',
-      labels: ['draw 1 📜'],
-      effect(player: Player) {
-        drawCard('policies')
+      labels: ['get card', '📜'],
+      isCard: true,
+      effect (player: Player) {
+        // TODO: apply effect of the action+option+player choice
       },
       disabled: (player: Player) => false
     },
     {
       name: 'Embezzlement',
       labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.influence -= 1
         player.stats.gold += 2
         player.stats.relics += 1
@@ -49,7 +51,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
     {
       name: 'Offering',
       labels: ['-1 🏺', '+3 ⚜️'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.influence += 3
         player.stats.relics -= 1
       },
@@ -58,7 +60,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
     {
       name: 'Donation',
       labels: ['-1 💰', '+1 ⚜️'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.gold--
         player.stats.influence++
       },
@@ -67,7 +69,7 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
     {
       name: 'Skip',
       labels: ['🙏'],
-      effect() {},
+      effect () {},
       disabled: () => false,
     }
   ],
@@ -75,9 +77,10 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
   eden: [
     {
       name: 'Blessing',
-      labels: ['draw 1 ✨'],
-      effect() {
-        drawCard('blessings')
+      labels: ['get card', '✨'],
+      isCard: true,
+      effect (player: Player) {
+        // TODO: apply effect of the action+option+player choice
       },
       disabled: () => false
     }
@@ -86,9 +89,10 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
   hell: [
     {
       name: 'Wrath',
-      labels: ['draw 1 💢'],
-      effect(player: Player) {
-        drawCard('damnations')
+      labels: ['get card', '💢'],
+      isCard: true,
+      effect (player: Player) {
+        // TODO: apply effect of the action+option+player choice
       },
       disabled: () => false
     }
@@ -102,7 +106,7 @@ const decks: {[name in DeckName]: Card[]}= {
       label: 'Steal 5 💰 or 2 ⚜️ from player',
     },
     {
-      name: 'Grant',
+      name: 'Lawsuit',
       label: 'Steal 1 relic',
       choosePlayer: true
     },
@@ -110,10 +114,34 @@ const decks: {[name in DeckName]: Card[]}= {
       name: 'Tax Reform',
       options: [
         {
-          name: 'Tax richest </br> 2💰'
+          name: 'Tax richest </br> 2💰',
+          title: 'Tax richest player',
+          effect () {
+            const sortedArray = [...players].sort(
+              (a: Player, b: Player) => {
+                return a.stats.gold > b.stats.gold ? 1
+                  : a.stats.gold < b.stats.gold ? -1
+                  : 0
+              }
+            )
+            const richestPlayer = sortedArray.pop()
+            richestPlayer.stats.gold -= 2
+            renderMessages([
+              `Player ${richestPlayer.name} was taxed 2💰`
+            ])
+          }
         },
         {
-          name: 'Tax all 👥 </br> 1💰'
+          name: 'Tax all 👥 </br> 1💰',
+          title: 'Tax all players',
+          effect () {
+            players.forEach(player => {
+              player.stats.gold--
+            })
+            renderMessages([
+              `Each player was taxed 1💰`
+            ])
+          }
         }
       ]
     }
@@ -123,10 +151,18 @@ const decks: {[name in DeckName]: Card[]}= {
       name: 'Ancient Relic',
       options: [
         {
-          name: 'Sell +1 💰'
+          name: 'Sell +1 💰',
+          title: 'Sell Relic',
+          effect (player: Player) {
+            player.stats.gold++
+          }
         },
         {
-          name: 'Keep + 1 🏺'
+          name: 'Keep + 1 🏺',
+          title: 'Keep Relic',
+          effect (player: Player) {
+            player.stats.relics++
+          }
         }
       ]
     },
@@ -145,6 +181,14 @@ const decks: {[name in DeckName]: Card[]}= {
       label: 'Players on Earth -1⚜️'
     }
   ]
+}
+
+const locationDecks: {[name in LocationName]: DeckName} = {
+  bank: null,
+  temple: null,
+  court: 'policies',
+  eden: 'blessings',
+  hell: 'damnations'
 }
 
 function updatePlayerLocation () {
@@ -171,22 +215,22 @@ function updatePlayerLocation () {
 }
 
 function createCardDecks () {
-  Object.entries(decks).forEach(([deckName, deck]) => {
-    let cards: Card[] = []
+  Object.entries(decks).forEach(([deckName, deck], index) => {
+    cards[deckName] = []
     deck.forEach((card) => {
       // Adds same card multiple times
       for (let i = 0; i < CARD_COUNT; i++) {
-        cards.push({...card})
+        cards[deckName].push({...card})
       }
     })
-    shuffleArray(cards)
+    shuffleArray(cards[deckName])
 
-    cards.forEach((card) => renderCard(card, deckName as DeckName))
+    cards[deckName].forEach((card) => renderCard(card, deckName as DeckName, index))
   })
 }
 
-function drawCard (deckName : DeckName) {
-  animateCardFlip(deckName)
+function getCard (deckName : DeckName): Card {
+  return cards[deckName].pop()
 }
 
 
@@ -201,5 +245,4 @@ function resetPlayerChoice (player: Player) {
 
 function setPlayerChoice (optionIndex: number, type: ChoiceType) {
   localPlayer.nextChoice[type] = optionIndex
-  submitPlayerChoice(localPlayer.nextChoice)
 }

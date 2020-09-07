@@ -2,6 +2,7 @@ const chalk = require('chalk');
 const concat = require('gulp-concat');
 const concatCss = require('gulp-concat-css');
 const cssmin = require('gulp-cssmin');
+const del = require('del');
 const fs = require('fs');
 const gulp = require('gulp');
 const htmlmin = require('gulp-htmlmin');
@@ -155,12 +156,27 @@ gulp.task('js-dev', gulp.parallel(
   gulp.series(
     'build-ts',
     'build-js-dev',
+    (done) => {
+      console.info('client.js built (dev)');
+      done();
+    }
   ),
   gulp.series(
     'build-server-ts',
     'build-server-js-dev',
-  )
+    (done) => {
+      console.info('server.js built (dev)');
+      done();
+    }
+  ),
 ));
+
+gulp.task('clean', () => {
+  return del([
+    'public/style.css',
+    'tmp/'
+  ])
+})
 
 gulp.task('build-prod', gulp.series(
   gulp.parallel(
@@ -175,6 +191,7 @@ gulp.task('build-prod', gulp.series(
   ),
   'build-server-ts',
   'build-server-js',
+  'clean',
 	'check', //also zips,
 	(done) => {done();}
 ));
@@ -184,6 +201,7 @@ gulp.task('build-dev', gulp.series(
   'js-dev',
   'build-css',
   'inject-css',
+  'clean',
 	'copy-img',
 	(done) => {done();}
 ));

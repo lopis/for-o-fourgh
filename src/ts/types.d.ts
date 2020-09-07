@@ -10,6 +10,7 @@ interface Player {
   stats: PlayerStats,
   nextChoice: Choice,
   location: number, // Location Index
+  card?: Card,
 }
 
 interface PlayerStats {
@@ -24,9 +25,10 @@ interface GameLocation {
   players: Player[]
 }
 
-interface LocationOption {
+interface LocationAction {
   name: string,
   labels: string[],
+  isCard?: boolean,
   effect: (player: Player) => void,
   disabled: (player: Player) => boolean,
 }
@@ -49,7 +51,8 @@ interface Option {
 
 interface CardOption {
   name: string,
-  function?: Function
+  title?: string,
+  effect: Function
 }
 
 interface Card {

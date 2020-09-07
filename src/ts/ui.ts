@@ -53,7 +53,7 @@ function renderPlayers () {
 function renderPlayerCards () {
   document.querySelector('.stats').innerHTML = players.map(
     player =>
-    `<div class="player ${player.char}">
+    `<div class="player ${player.char}${player === localPlayer ? ' local' : ''}">
       <div class="avatar char ${player.char}"></div>
       <div>
         <div class="text gold">${player.stats.gold}</div>
@@ -94,7 +94,7 @@ function renderLocations () {
 function renderActions () {
   const location = localPlayer.location
   const locationName: LocationName = locations[location - 1].name
-  const actions: LocationOption[] = locationActions[locationName]
+  const actions: LocationAction[] = locationActions[locationName]
 
   renderButtons('Choose an action', actions.map(
     (action, index) => ({
@@ -104,6 +104,29 @@ function renderActions () {
         <div class="labels">${action.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })
   ), 'action')
+  applyTinyFont('.action-title')
+}
+
+function renderOptions (card: Card) {
+  renderButtons(`${card.name}: choose an option`, card.options.map(
+    (option: CardOption, index: number) => ({
+      title: option.title,
+      disabled: false,
+      html: `<div class="action-title">${index + 1}._${option.name}</div>
+        <div>${option.title}</div>`
+    })
+  ), 'option')
+  applyTinyFont('.action-title')
+}
+
+function renderTargetPlayers () {
+  renderButtons('Choose target player', players.filter(p => p !== localPlayer).map(
+    (player: Player, index: number) => ({
+      title: '',
+      disabled: false,
+      html: `<div class="action-title">${player.name}</div><div class="char ${player.char}"></div>`,
+    })
+  ), 'target')
   applyTinyFont('.action-title')
 }
 
@@ -121,10 +144,11 @@ function adjustUIScale () {
   updatePixelSize()
 }
 
-function renderCard (card: Card, deck: DeckName) {
+function renderCard (card: Card, deck: DeckName, index: number) {
   const cardElement = document.createElement('div')
 
   cardElement.className = 'card'
+  cardElement.id = `${index}`
   cardElement.innerHTML = [
     `<div class="front"></div>`,
       `<div class="back">`,
@@ -138,11 +162,13 @@ function renderCard (card: Card, deck: DeckName) {
   document.querySelector(`.deck.${deck}`).append(cardElement)
 }
 
-function animateCardFlip (deckName: string) {
-  const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card:not(.flip)`)).pop()
+// function animateCardFlip (deckName: DeckName): Card {
+//   const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card:not(.flip)`)).pop()
 
-  topCard.classList.add('flip')
-  setTimeout(() => {
-    topCard.parentElement.removeChild(topCard)
-  }, CARD_TIMEOUT)
-}
+//   topCard.classList.add('flip')
+//   setTimeout(() => {
+//     topCard.parentElement.removeChild(topCard)
+//   }, CARD_TIMEOUT)
+
+//   return decks[deckName][parseInt(topCard.id)];
+// }

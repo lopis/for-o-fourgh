@@ -14,6 +14,8 @@ body {
   overflow: hidden;
   font-family: "Ubuntu", "Twemoji Mozilla", sans-serif;
   transition: opacity 100ms ease-in;
+  image-rendering: pixelated;
+  image-rendering: optimizespeed;
 
   --pixel-size: 10px;
   --dot-size: var(--pixel-size);
