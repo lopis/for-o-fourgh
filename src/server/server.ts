@@ -3,7 +3,7 @@
 let users: User[] = [];
 let bots: User[] = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
-let PLAYER_NUM = 5;
+let PLAYER_NUM = 2;
 const PLAZA_LOCATION = 6;
 
 function removePlayer(user: User) {
@@ -147,7 +147,7 @@ module.exports = {
     users.push(user);
 
 		socket.on("join", (name: string) => {
-      // joinBotPlayer();
+      joinBotPlayer();
       user.name = name;
 			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
 

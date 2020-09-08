@@ -87,6 +87,8 @@
   position: absolute;
   top: 0;
   left: 0;
+  transition: transform 1s linear;
+  transition-timing-function: steps(10);
 }
 
 .char.animated {
