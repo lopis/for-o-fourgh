@@ -42,6 +42,17 @@ function renderMessages (messages: string[]) {
   applyTinyFont('.actions .text')
 }
 
+function resetPlayerPosition (player: Player) {
+  const $player: HTMLElement = document.querySelector(`.map .${player.char}`)
+  if (players.indexOf(player) % 2) {
+    $player.style.transform =
+      'translateX(calc(var(--pixel-size) * -10)) translateY(calc(var(--pixel-size) * 51))'
+  } else {
+    $player.style.transform =
+      'translateX(calc(var(--pixel-size) * 64)) translateY(calc(var(--pixel-size) * 51))'
+  }
+}
+
 function renderPlayers () {
   players.forEach((player: Player, index) => {
     const $player : HTMLElement = document.querySelector(`.map .char.${player.char}`)
@@ -50,31 +61,55 @@ function renderPlayers () {
     const $location : HTMLElement = document.querySelector(`.${locationName}`)
 
     let x = $location.offsetLeft
+    let y = $location.offsetTop
+
     let playerIndex = location.players.indexOf(player)
     if ([COURT, HELL].includes(locationName)) {
-      x -= (1 + playerIndex) * ($player.clientWidth + pixelSize)
+      x -= (location.players.length - playerIndex) * ($player.clientWidth + pixelSize)
     } else  if ([TEMPLE, PLAZA].includes(locationName)) {
-      x -= $player.clientWidth / 2
-      if (playerIndex % 2 === 0) {
+      x -= $player.clientWidth
+      if (playerIndex % 2) {
         x -= (playerIndex / 2) * ($player.clientWidth + pixelSize)
       } else {
         x += ((1 + playerIndex) / 2) * ($player.clientWidth + pixelSize)
       }
     } else {
-      x += (1 + playerIndex) * ($player.clientWidth + pixelSize)
+      x += (playerIndex) * ($player.clientWidth + pixelSize)
     }
 
-    const y = $location.offsetTop
-    const steps = Math.round(Math.max(x, y) / (pixelSize * 2))
-    const duration = steps * 100
+    const steps = {
+      x: Math.round(x / (pixelSize * 2)),
+      y: Math.round(y / (pixelSize * 2)),
+    }
+    const duration = {
+      x: steps.x * 100,
+      y: steps.y * 100
+    }
 
-    $player.style.transition = `transform ${duration}ms linear`
-    $player.style.transitionTimingFunction = `steps(${steps})`
-    $player.style.transform = `translate(${x}px, ${y}px)`
+    const moveX = () => {
+      $player.style.transition = `transform ${duration.x}ms linear`
+      $player.style.transitionTimingFunction = `steps(${steps.x})`
+      $player.style.transform = $player.style.transform.replace(/translateX\(.+\) t/, `translateX(${x}px) t`)
+    }
+
+    const moveY = () => {
+      $player.style.transition = `transform ${duration.y}ms linear`
+      $player.style.transitionTimingFunction = `steps(${steps.y})`
+      $player.style.transform = $player.style.transform.replace(/translateY\(.+\)/, `translateY(${y}px)`)
+    }
+
     $player.classList.add('animated')
+    if (![TEMPLE, PLAZA].includes(locationName)) {
+      moveY()
+      setTimeout(moveX, duration.y + 100)
+    } else {
+      moveX()
+      setTimeout(moveY, duration.x + 100)
+    }
+
     setTimeout(() => {
       $player.classList.remove('animated')
-    }, duration + 500)
+    }, (duration.x + duration.y) + 500)
   })
 }
 

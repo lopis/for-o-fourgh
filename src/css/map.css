@@ -87,11 +87,6 @@
   position: absolute;
   top: 0;
   left: 0;
-  transform: translate(calc(var(--pixel-size) * -10), calc(var(--pixel-size) * 51));
-}
-
-.map .char:nth-child(2n-1) {
-  transform: translate(calc(var(--pixel-size) * 64), calc(var(--pixel-size) * 51));
 }
 
 .char.animated {

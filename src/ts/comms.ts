@@ -34,10 +34,11 @@ function bind() {
       players.forEach((player: Player) => {
         const $player: HTMLElement = document.querySelector(`.hidden .char.${player.char}`)
         if ($player) {
-          locations[5].players.push(player)
           document.querySelector('.map').appendChild($player)
+          resetPlayerPosition(player)
         }
       })
+      locations[5].players = users
       renderPlayers()
     }
     renderPlayerCards()
