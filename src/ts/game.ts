@@ -64,7 +64,7 @@ const promptForPlayerOption = (resolve: Function) => {
 }
 
 const promptForPlayerTarget = (resolve: Function) => {
-  if (localPlayer.card) {
+  if (localPlayer.card && localPlayer.card.choosePlayer) {
     renderTargetPlayers()
     waitForLocalPlayerChoice('target', resolve)
   } else {

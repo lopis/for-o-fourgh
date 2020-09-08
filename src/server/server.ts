@@ -4,7 +4,7 @@ let users: User[] = [];
 let bots: User[] = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
 let PLAYER_NUM = 2;
-const BANK_LOCATION = 1;
+const PLAZA_LOCATION = 6;
 
 function removePlayer(user: User) {
   users.splice(users.indexOf(user), 1);
@@ -108,7 +108,7 @@ class User {
   nextChoice: any = {};
   name: string;
   char: string;
-  location: number = BANK_LOCATION;
+  location: number = PLAZA_LOCATION;
 
 	constructor(socket: SocketIO.Socket) {
 		this.socket = socket;
@@ -147,7 +147,7 @@ module.exports = {
     users.push(user);
 
 		socket.on("join", (name: string) => {
-      joinBotPlayer();
+      // joinBotPlayer();
       user.name = name;
 			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
 

@@ -30,7 +30,16 @@ function bind() {
       player.stats = playerStats[player.id] || {...DEFAULT_STATS}
       playerStats[player.id] = player.stats
     })
-    renderPlayers()
+    if (gameState === 'lobby') {
+      players.forEach((player: Player) => {
+        const $player: HTMLElement = document.querySelector(`.hidden .char.${player.char}`)
+        if ($player) {
+          locations[5].players.push(player)
+          document.querySelector('.map').appendChild($player)
+        }
+      })
+      renderPlayers()
+    }
     renderPlayerCards()
   })
 }

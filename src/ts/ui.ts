@@ -1,3 +1,5 @@
+let pixelSize = 1
+
 function renderButtons (
   title : string,
   options : Option[],
@@ -41,11 +43,37 @@ function renderMessages (messages: string[]) {
 }
 
 function renderPlayers () {
-  locations.forEach(location => {
-    location.players.forEach(player => {
-      document.querySelector(`.${location.name}`).appendChild(
-        document.querySelector(`.map .char.${player.char}`)
-      )
+  players.forEach((player: Player, index) => {
+    const $player : HTMLElement = document.querySelector(`.map .char.${player.char}`)
+    const location = locations[player.location - 1]
+    const locationName = location.name
+    const $location : HTMLElement = document.querySelector(`.${locationName}`)
+
+    let x = $location.offsetLeft
+    let playerIndex = location.players.indexOf(player)
+    if ([COURT, HELL].includes(locationName)) {
+      x -= (1 + playerIndex) * ($player.clientWidth + pixelSize)
+    } else  if ([TEMPLE, PLAZA].includes(locationName)) {
+      x -= $player.clientWidth / 2
+      if (playerIndex % 2 === 0) {
+        x -= (playerIndex / 2) * ($player.clientWidth + pixelSize)
+      } else {
+        x += ((1 + playerIndex) / 2) * ($player.clientWidth + pixelSize)
+      }
+    } else {
+      x += (1 + playerIndex) * ($player.clientWidth + pixelSize)
+    }
+
+    const y = $location.offsetTop
+    const steps = Math.round(Math.max(x, y) / pixelSize) / 5
+    const duration = steps * 50
+
+    $player.style.transition = `transform ${duration}ms linear`
+    $player.style.transitionTimingFunction = `steps(${steps})`
+    $player.style.transform = `translate(${x}px, ${y}px)`
+    $player.classList.add('animated')
+    setTimeout(() => {
+      $player.classList.remove('animated')
     })
   })
 }
@@ -137,7 +165,8 @@ function adjustUIScale () {
       document.documentElement.clientWidth - 150
     )
 
-    document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 110)}px`)
+    pixelSize = 2 * Math.round(smallestSize / 220)
+    document.body.style.setProperty('--pixel-size', `${pixelSize}px`)
   }
 
   window.onresize = updatePixelSize

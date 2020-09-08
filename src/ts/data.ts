@@ -12,6 +12,7 @@ const locations: GameLocation[] = [
   TEMPLE,
   EDEN,
   HELL,
+  PLAZA,
 ].map((name: LocationName, index: number) => ({index: index+1, name, players: []}))
 
 const locationActions: {[name in LocationName]: LocationAction[]} = {
