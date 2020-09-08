@@ -65,8 +65,8 @@ function renderPlayers () {
     }
 
     const y = $location.offsetTop
-    const steps = Math.round(Math.max(x, y) / pixelSize) / 5
-    const duration = steps * 50
+    const steps = Math.round(Math.max(x, y) / (pixelSize * 2))
+    const duration = steps * 100
 
     $player.style.transition = `transform ${duration}ms linear`
     $player.style.transitionTimingFunction = `steps(${steps})`
@@ -74,7 +74,7 @@ function renderPlayers () {
     $player.classList.add('animated')
     setTimeout(() => {
       $player.classList.remove('animated')
-    })
+    }, duration + 500)
   })
 }
 
@@ -105,7 +105,7 @@ function updatePlayerCards () {
 function renderLocations () {
   renderButtons(
     'Go to',
-    locations.map(
+    [...locations].splice(0,5).map(
       ({name, index}) => ({
         title: name,
         html: `${index}._${name}`,

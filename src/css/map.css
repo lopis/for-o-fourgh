@@ -90,6 +90,10 @@
   transform: translate(calc(var(--pixel-size) * -10), calc(var(--pixel-size) * 51));
 }
 
+.map .char:nth-child(2n-1) {
+  transform: translate(calc(var(--pixel-size) * 64), calc(var(--pixel-size) * 51));
+}
+
 .char.animated {
   animation: walk 0.3s steps(1) infinite;
 }
@@ -117,4 +121,16 @@
 
 .dissident {
   background-position-x: 50%;
+}
+
+@keyframes walk {
+  0% {
+    background-position-y: 50%;
+  }
+  50% {
+    background-position-y: 100%;
+  }
+  100% {
+    background-position-y: 50%;
+  }
 }
