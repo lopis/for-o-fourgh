@@ -48,23 +48,19 @@ const promptForPlayerOption = (resolve: Function) => {
   const locationName = locations[localPlayer.location - 1].name
   const action = locationActions[locationName][localPlayer.nextChoice.action - 1]
 
-  if (action.isCard) {
-    localPlayer.card = getCard(locationDecks[locationName])
-    if (localPlayer.card.options) {
-      renderOptions(localPlayer.card)
-      console.log('prompt player option', localPlayer.card);
-      waitForLocalPlayerChoice('option', resolve)
-    } else {
-      resolve()
-    }
+  if (action.options) {
+    renderOptions(action.options)
+    waitForLocalPlayerChoice('option', resolve)
   } else {
-    console.log('prompt player option', 'pass', localPlayer.location, action);
     resolve()
   }
 }
 
 const promptForPlayerTarget = (resolve: Function) => {
-  if (localPlayer.card && localPlayer.card.choosePlayer) {
+  const locationName = locations[localPlayer.location - 1].name
+  const action = locationActions[locationName][localPlayer.nextChoice.action - 1]
+
+  if (action.targetPlayer) {
     renderTargetPlayers()
     waitForLocalPlayerChoice('target', resolve)
   } else {
@@ -79,6 +75,8 @@ const waitForPlayersActions = (resolve: Function) => {
 
 // Game applies action reward/price for all players
 const applyActionEffects = (resolve: Function) => {
+  const messages : string[] = ['Round Log:']
+
   players.forEach(player => {
     const locationName = locations[player.location - 1].name
 
@@ -90,14 +88,16 @@ const applyActionEffects = (resolve: Function) => {
     const nextAction = locationActions[locationName][player.nextChoice.action - 1]
 
     console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
+    messages.push(`<strong>${player.name}</strong> ${nextAction.getMessage(player)}`)
     resetPlayerChoice(player)
 
     if (!nextAction.disabled(player)) {
       nextAction.effect(player)
     }
-    updatePlayerCards()
-    resolve()
+    updatePlayerStats()
   })
+
+  renderMessages(messages, resolve, 'continue')
 }
 
 // Game shows the reward and price to all players openly
@@ -112,6 +112,14 @@ const checkGameEnd = (resolve: Function) => {
   return true
 }
 
+const waitForAnimations = (resolve: Function) => {
+  if (renderingSemaphore > 0) {
+    requestAnimationFrame(() => waitForAnimations(resolve))
+  } else {
+    resolve()
+  }
+}
+
 let mainLoopState : string
 const setState = (stateFunction: (resolve: Function) => any): () => Promise<any> => () => {
   mainLoopState = stateFunction.name
@@ -120,7 +128,8 @@ const setState = (stateFunction: (resolve: Function) => any): () => Promise<any>
 }
 
 const mainLoop = () => {
-  setState(promptNextLocation)()
+  setState(waitForAnimations)()
+  .then(setState(promptNextLocation))
   .then(setState(submitPlayerChoice))
   .then(setState(waitForPlayersLocation))
   .then(setState(animatePlayers))
@@ -137,8 +146,6 @@ const mainLoop = () => {
 }
 
 function gameStart () {
-  createCardDecks()
-
   requestAnimationFrame(() => {
     const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`)
     document.body.style.opacity = '1'

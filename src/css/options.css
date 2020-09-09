@@ -63,3 +63,9 @@
 .btn .char {
   margin-top: calc(var(--pixel-size) * 1);
 }
+
+.message {
+  line-height: 1.5;
+  text-align: left;
+  width: calc(var(--pixel-size) * 64);
+}

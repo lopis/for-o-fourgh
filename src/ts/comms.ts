@@ -41,7 +41,7 @@ function bind() {
       locations[5].players = users
       renderPlayers()
     }
-    renderPlayerCards()
+    renderPlayerStats()
   })
 }
 
@@ -72,4 +72,3 @@ function submitMove () {
 function submitReset () {
   socket.emit('resetChoice')
 }
-

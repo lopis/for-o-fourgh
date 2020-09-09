@@ -1,6 +1,3 @@
-const CARD_COUNT = 5
-const CARD_TIMEOUT = 5000
-
 const WAITING = 'Waiting for others...'
 
 const DEFAULT_STATS = {

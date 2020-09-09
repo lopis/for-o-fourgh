@@ -1,6 +1,5 @@
 type LocationName = 'bank' | 'court' | 'temple' | 'eden' | 'hell';
 type Character = 'devotee' | 'saint' | 'baal' | 'marx' | 'dissident'
-type DeckName = 'policies' | 'blessings' | 'damnations'
 type GameState = 'lobby' | 'start' | 'end'
 
 interface Player {
@@ -10,7 +9,6 @@ interface Player {
   stats: PlayerStats,
   nextChoice: Choice,
   location: number, // Location Index
-  card?: Card,
 }
 
 interface PlayerStats {
@@ -28,9 +26,11 @@ interface GameLocation {
 interface LocationAction {
   name: string,
   labels: string[],
-  isCard?: boolean,
+  options?: ActionOption[],
+  targetPlayer?: boolean,
   effect: (player: Player) => void,
   disabled: (player: Player) => boolean,
+  getMessage: (player: Player) => string
 }
 
 interface Game {
@@ -43,23 +43,16 @@ interface Action {
   index: number,
 }
 
-interface Option {
+interface ButtonOption {
   html: string,
   title: string,
   disabled: boolean,
 }
 
-interface CardOption {
+interface ActionOption {
   name: string,
   title?: string,
   effect: Function
-}
-
-interface Card {
-  name: string,
-  label?: string,
-  options?: CardOption[],
-  choosePlayer?: boolean
 }
 
 type ChoiceType = 'location' | 'action' | 'option' | 'target'

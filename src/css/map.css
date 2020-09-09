@@ -5,8 +5,8 @@
   height: calc(var(--pixel-size) * 64);
   width: calc(var(--pixel-size) * 64);
   position: relative;
-  border: calc(var(--pixel-size) * 2) solid #c4bfb0;
-  margin: calc(2 * var(--pixel-size)) 0;
+  box-shadow: 0 0 0 calc(var(--pixel-size) * 2) #c4bfb0;
+  margin: calc(4 * var(--pixel-size));
   overflow: hidden;
 }
 
@@ -85,6 +85,7 @@
 
 .map .char {
   position: absolute;
+  margin-left: calc(var(--pixel-size) * -2);
   top: 0;
   left: 0;
   transition: transform 1s linear;
