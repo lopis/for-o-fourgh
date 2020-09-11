@@ -26,7 +26,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .title {
@@ -37,4 +37,5 @@ body {
 h1 {
   --dot-size: calc(var(--pixel-size) * 2);
   margin: 0;
+  z-index: 2  ;
 }

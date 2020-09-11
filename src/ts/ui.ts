@@ -194,10 +194,10 @@ function renderActions () {
 function renderOptions (options: ActionOption[]) {
   renderButtons(`Choose an option`, options.map(
     (option: ActionOption, index: number) => ({
-      title: option.title,
+      title: option.name,
       disabled: false,
       html: `<div class="action-title">${index + 1}._${option.name}</div>
-        <div>${option.title}</div>`
+      <div class="labels">${option.labels.map(label => `<div>${label}</div>`).join('')}</div>`
     })
   ), 'option')
   applyTinyFont('.action-title')

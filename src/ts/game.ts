@@ -75,7 +75,7 @@ const waitForPlayersActions = (resolve: Function) => {
 
 // Game applies action reward/price for all players
 const applyActionEffects = (resolve: Function) => {
-  const messages : string[] = ['Round Log:']
+  const messages : string[] = ['Round Results']
 
   players.forEach(player => {
     const locationName = locations[player.location - 1].name
@@ -145,11 +145,15 @@ const mainLoop = () => {
   .then(setState(mainLoop))
 }
 
+
+
 function gameStart () {
   requestAnimationFrame(() => {
-    const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`)
-    document.body.style.opacity = '1'
-    renderMessages([WAITING])
-    joinGame(name)
+    setState(promptPlayerName)()
+    .then((name) => {
+      inputHandler = buttonInputHandler
+      renderMessages([WAITING])
+      joinGame(name)
+    })
   });
 }

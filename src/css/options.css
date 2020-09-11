@@ -4,7 +4,6 @@
 }
 
 .btn {
-	background: #fff8e3;
 	color: #504c40;
 	padding: var(--pixel-size);
 	line-height: 1;
@@ -16,7 +15,8 @@
   font-size: calc(var(--pixel-size) * 3);
 }
 
-.btn::before {
+.btn::before,
+.btn::after {
 	content: "";
 	position: absolute;
 	height: 100%;
@@ -27,20 +27,16 @@
 	z-index: -1;
 }
 
-.btn:hover:not(.disabled) {
-  background: white;
+.btn::after {
+	background: #fff8e3;
+	top: 0;
+	right: 0;
 }
 
-.btn:not(.disabled):active,
-.btn:not(.disabled).pressed {
-  top: var(--pixel-size);
-  right: var(--pixel-size);
-}
-
-.btn:not(.disabled):active::before,
-.btn:not(.disabled).pressed::before {
-  top: 1px;
-  right: 1px;
+.btn:not(.disabled):active::after,
+.btn:not(.disabled).pressed::after {
+  top: calc(var(--pixel-size) / 2);
+  right: calc(var(--pixel-size) / 2);
 }
 
 .labels div {

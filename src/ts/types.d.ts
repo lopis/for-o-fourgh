@@ -51,7 +51,7 @@ interface ButtonOption {
 
 interface ActionOption {
   name: string,
-  title?: string,
+  labels?: string[],
   effect: Function
 }
 

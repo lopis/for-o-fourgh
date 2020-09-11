@@ -35,7 +35,7 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
       options: [
         {
           name: 'Tax Richest',
-          title: 'Richest 👤 -2💰',
+          labels: ['Richest 👤 -2💰'],
           effect (player: Player) {
             const sortedArray: Player[] = [...players].sort(
               (a: Player, b: Player) => {
@@ -51,8 +51,8 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
           }
         },
         {
-          name: 'Tax all 👥 </br> 1💰',
-          title: 'All players -1💰',
+          name: 'Tax all',
+          labels: ['All players -1💰'],
           effect () {
             players.forEach(player => {
               player.stats.gold--
