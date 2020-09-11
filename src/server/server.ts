@@ -2,7 +2,8 @@
 
 let users: User[] = [];
 let bots: User[] = [];
-let characters = ["saint", "baal", "marx", "dissident", "devotee"];
+const initialChars = ["saint", "baal", "marx", "dissident", "devotee"];
+let characters = initialChars;
 let PLAYER_NUM = 5;
 const PLAZA_LOCATION = 6;
 
@@ -11,26 +12,27 @@ function removePlayer(user: User) {
 }
 
 function getChar () {
-  return characters.find(char => {
-    return !users.find(user => user.char === char)
-  })
+  const randomIndex = Math.round(Math.random() * (characters.length - 1))
+  const char = characters[randomIndex]
+  characters.splice(randomIndex, 1);
+
+  return char;
 }
 
 function joinBotPlayer () {
-  const bot = new User(null);
-  bot.name = 'Bot';
-  bot.isBot = true;
-  bot.char = getChar();
+  const bot = new User(null, 'Bot' + (bots.length + 1));
   users.push(bot);
   bots.push(bot);
-  console.log(`Bot joined the game`);
+  bot.name = bot.id;
+  bot.isBot = true;
+  console.log(`${bot.name} joined as ${bot.char} (characters: ${JSON.stringify(characters)}).`);
 }
 
-function removeBot () {
+function removeBots () {
   bots.forEach(bot => {
     console.log('Bot left the game');
-    characters.push(bot.char);
     removePlayer(bot);
+    characters.push(bot.char);
     bots.splice(bots.indexOf(bot), 1);
   })
 }
@@ -110,9 +112,9 @@ class User {
   char: string;
   location: number = PLAZA_LOCATION;
 
-	constructor(socket: SocketIO.Socket) {
+	constructor(socket: SocketIO.Socket, id?: string) {
 		this.socket = socket;
-    this.id = socket ? socket.id : 'bot'
+    this.id = id ? id : socket.id
     this.char = getChar()
 	}
 
@@ -166,8 +168,14 @@ module.exports = {
 
 		socket.on("disconnect", () => {
       console.log("Disconnected: " + socket.id);
+      removePlayer(user);
       characters.push(user.char);
-			removePlayer(user);
+      if (users.every(user => user.isBot)) {
+        users = []
+        removeBots()
+        bots = []
+      }
+      users.forEach(user => user.updateUsers())
     });
 
 		socket.on("choice", (choice) => {
@@ -176,7 +184,7 @@ module.exports = {
         console.log(`Player ${user.name} goes to ${location}`);
         playBotLocation();
       } else {
-        console.log(`Player ${user.name} performs action ${action}/${option}/${target}"`);
+        console.log(`Player ${user.name} performs action ${action}/${option}/${target}`);
         playBotAction();
       }
 
@@ -200,12 +208,36 @@ module.exports = {
     });
 
     socket.on("forceStart", () => {
-      for (let index = PLAYER_NUM; index > users.length; index--) {
+      const botCount = PLAYER_NUM - users.length
+      for (let index = botCount; index > 0; index--) {
         joinBotPlayer();
       }
+      console.log(`${users.length} players, ${bots.length} of which are bots, start the game.`);
+
+      users.forEach(user => user.updateUsers())
+      users.forEach(user => user.startGame())
     })
 
 		console.log("Connected: " + socket.id);
-  }
+  },
+
+	'stats': (req: any, res: any ) => {
+    res.json({
+      players: users.map(({isBot, id, nextChoice, name, char, location}) => ({
+        name,
+        char,
+        id,
+        nextChoice,
+        location,
+      })),
+      bots: bots.map(({isBot, id, nextChoice, name, char, location}) => ({
+        name,
+        char,
+        id,
+        nextChoice,
+        location,
+      }))
+    });
+	},
 
 };

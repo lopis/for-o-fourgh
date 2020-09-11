@@ -39,28 +39,29 @@ function renderMessages (messages: string[], dismissCallback?: Function, dismiss
   document.querySelector('.actions .title').innerHTML = messages.map(
     (message, index) => `<div class="${index > 0 ? 'message' : 'text'}">${message}</div>`
   ).join('')
-  applyTinyFont('.actions .text')
 
   if (dismissCallback) {
     const button = document.createElement('div')
     button.innerHTML = dismissText
-    button.className = 'btn'
+    button.className = 'btn text'
     button.onclick = () => dismissCallback()
     document.querySelector('.actions .options').appendChild(button)
   }
+
+  applyTinyFont('.actions .text')
 }
 
 const CHAR_WIDTH = 4
 const charPos: {[char: string]: {x: number, y: number}} = {}
 
-function resetPlayerPosition (player: Player) {
+function resetPlayerPosition (player: Player, index: number) {
   const $player: HTMLElement = document.querySelector(`.map .${player.char}`)
   let x, y
   if (players.indexOf(player) % 2 === 0) {
-    x = -4
+    x = -4 - (index * CHAR_WIDTH)
     y = 51
   } else {
-    x = 68
+    x = 68 + (index * CHAR_WIDTH)
     y = 51
   }
   charPos[player.char] = {x, y}
@@ -82,7 +83,7 @@ function renderPlayers () {
 
     let playerIndex = location.players.indexOf(player)
     if ([COURT, HELL].includes(locationName)) {
-      x -= (location.players.length - playerIndex) * (CHAR_WIDTH + 1)
+      x -= (playerIndex) * (CHAR_WIDTH + 1)
     } else  if ([TEMPLE, PLAZA].includes(locationName)) {
       if (playerIndex % 2) {
         x += ((1 + playerIndex) / 2) * (CHAR_WIDTH + 1)

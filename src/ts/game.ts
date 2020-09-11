@@ -152,7 +152,7 @@ function gameStart () {
     setState(promptPlayerName)()
     .then((name) => {
       inputHandler = buttonInputHandler
-      renderMessages([WAITING])
+      renderMessages([WAITING], startGame, 'Start_against_PC')
       joinGame(name)
     })
   });
