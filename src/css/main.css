@@ -14,6 +14,8 @@ body {
   overflow: hidden;
   font-family: "Ubuntu", "Twemoji Mozilla", sans-serif;
   transition: opacity 100ms ease-in;
+  image-rendering: pixelated;
+  image-rendering: optimizespeed;
 
   --pixel-size: 10px;
   --dot-size: var(--pixel-size);
@@ -24,7 +26,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .title {
@@ -35,4 +37,5 @@ body {
 h1 {
   --dot-size: calc(var(--pixel-size) * 2);
   margin: 0;
+  z-index: 2  ;
 }

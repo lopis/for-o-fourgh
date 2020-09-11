@@ -20,7 +20,7 @@
 }
 
 .letter + .letter {
-  margin-left: calc(0.5 * var(--dot-width));
+  margin-left: calc(1 * var(--dot-width));
 }
 
 .letter > i {
@@ -30,7 +30,8 @@
 
 i[black] {
   background: currentColor;
-  /* box-shadow: 1px 0 0 0 currentColor, 0 1px 0 0 currentColor, 1px 1px 0 0 currentColor; */
+  border-left: 1px solid currentColor;
+  margin-right: -1px;
 }
 
 i:not([black]) {

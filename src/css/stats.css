@@ -28,11 +28,6 @@
   left: calc(-0.5 * var(--pixel-size));
 }
 
-.stats .char {
-  image-rendering: pixelated;
-  image-rendering: optimizespeed;
-}
-
 .gold::after {
   content: "💰";
   margin-left: 0.5em;
@@ -52,4 +47,8 @@
   color: #504c40;
   font-size: calc(var(--pixel-size) * 3);
   line-height: 1;
+}
+
+.player.local::before {
+  box-shadow: 0 0 0 var(--pixel-size) #da7474;
 }

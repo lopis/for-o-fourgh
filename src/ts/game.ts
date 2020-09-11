@@ -2,12 +2,12 @@
 /// <reference path="./ui.ts" />
 /// <reference path="./strings.ts" />
 
-const promptNextLocation = () : Promise<null> => {
-  return new Promise((resolve) => {
-    submitReset()
-    renderLocations()
-    resolve()
-  })
+const waitForLocalPlayerChoice = (type: ChoiceType, resolvePromise: Function) => {
+  if (Number.isInteger(localPlayer.nextChoice[type])) {
+    resolvePromise()
+  } else {
+    requestAnimationFrame(() => waitForLocalPlayerChoice(type, resolvePromise));
+  }
 }
 
 const waitForAllOptions = (type : ChoiceType, resolvePromise : Function) => {
@@ -20,95 +20,140 @@ const waitForAllOptions = (type : ChoiceType, resolvePromise : Function) => {
   }
 }
 
+const promptNextLocation = (resolve: Function) => {
+  submitReset()
+  renderLocations()
+  waitForLocalPlayerChoice('location', resolve)
+}
+
 // Game waits for all players to chose, up to limit
-const waitForPlayersLocation = () : Promise<null> => {
-  return new Promise((resolve) => {
-    waitForAllOptions('location', resolve)
-  })
+const waitForPlayersLocation = (resolve: Function) => {
+  waitForAllOptions('location', resolve)
 }
 
 // Game plays animation of all players moving to next location
-const animatePlayers = () : Promise<null> => {
-  return new Promise((resolve) => {
-    updatePlayerLocation()
-    resolve()
-  })
+const animatePlayers = (resolve: Function) => {
+  updatePlayerLocation()
+  resolve()
 }
 
 // Game shows possible actions to players
-const promptNextAction = () : Promise<null> => {
-  return new Promise((resolve) => {
-    renderActions()
+const promptNextAction = (resolve: Function) => {
+  renderActions()
+  waitForLocalPlayerChoice('action', resolve)
+}
+
+// Render action options if available, skip otherwise
+const promptForPlayerOption = (resolve: Function) => {
+  const locationName = locations[localPlayer.location - 1].name
+  const action = locationActions[locationName][localPlayer.nextChoice.action - 1]
+
+  if (action.options) {
+    renderOptions(action.options)
+    waitForLocalPlayerChoice('option', resolve)
+  } else {
     resolve()
-  })
+  }
+}
+
+const promptForPlayerTarget = (resolve: Function) => {
+  const locationName = locations[localPlayer.location - 1].name
+  const action = locationActions[locationName][localPlayer.nextChoice.action - 1]
+
+  if (action.targetPlayer) {
+    renderTargetPlayers()
+    waitForLocalPlayerChoice('target', resolve)
+  } else {
+    resolve()
+  }
 }
 
 // Wait for all players to pick their actions
-const waitForPlayersActions = () : Promise<null> => {
-  return new Promise((resolve) => {
-    waitForAllOptions('action', resolve)
-  })
+const waitForPlayersActions = (resolve: Function) => {
+  waitForAllOptions('action', resolve)
 }
 
 // Game applies action reward/price for all players
-const applyActionEffects = () : Promise<null> => {
-  return new Promise((resolve) => {
-    players.forEach(player => {
-      const locationName = locations[player.location - 1].name
+const applyActionEffects = (resolve: Function) => {
+  const messages : string[] = ['Round Results']
 
-      // Normalizes value because bots use a random from 0 to 100
-      if (player.nextChoice.action > locationActions[locationName].length) {
-        player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
-      }
+  players.forEach(player => {
+    const locationName = locations[player.location - 1].name
 
-      const nextAction = locationActions[locationName][player.nextChoice.action - 1]
+    // Normalizes value because bots use a random from 0 to 100
+    if (player.nextChoice.action > locationActions[locationName].length) {
+      player.nextChoice.action = (player.nextChoice.action - 1) % locationActions[locationName].length + 1
+    }
 
-      console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
-      resetPlayerChoice(player)
+    const nextAction = locationActions[locationName][player.nextChoice.action - 1]
 
-      if (!nextAction.disabled(player)) {
-        nextAction.effect(player)
-      }
-      updatePlayerCards()
-      resolve()
-    })
+    console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
+    messages.push(`<strong>${player.name}</strong> ${nextAction.getMessage(player)}`)
+    resetPlayerChoice(player)
+
+    if (!nextAction.disabled(player)) {
+      nextAction.effect(player)
+    }
+    updatePlayerStats()
   })
+
+  renderMessages(messages, resolve, 'continue')
 }
 
 // Game shows the reward and price to all players openly
-const displayRewards = () : Promise<null> => {
-  return new Promise((resolve) => {
+const displayRewards = (resolve: Function) => {
 
-  })
 }
 
 // Game checks if game-end conditions have been met
-const checkGameEnd = () : Promise<boolean> => {
-  return new Promise((resolve) => {
-    // returns true if game should go on
+const checkGameEnd = (resolve: Function) => {
+  // returns true if game should go on
 
-    return true
-  })
+  return true
+}
+
+const waitForAnimations = (resolve: Function) => {
+  if (renderingSemaphore > 0) {
+    requestAnimationFrame(() => waitForAnimations(resolve))
+  } else {
+    resolve()
+  }
+}
+
+let mainLoopState : string
+const setState = (stateFunction: (resolve: Function) => any): () => Promise<any> => () => {
+  mainLoopState = stateFunction.name
+  console.log('State', mainLoopState);
+  return new Promise(stateFunction)
 }
 
 const mainLoop = () => {
-  promptNextLocation()
-  .then(waitForPlayersLocation)
-  .then(animatePlayers)
-  .then(promptNextAction)
-  .then(waitForPlayersActions)
-  .then(applyActionEffects)
-  // .then(displayRewards)
-  .then(mainLoop)
+  setState(waitForAnimations)()
+  .then(setState(promptNextLocation))
+  .then(setState(submitPlayerChoice))
+  .then(setState(waitForPlayersLocation))
+  .then(setState(animatePlayers))
+  .then(setState(promptNextAction))
+  .then(setState(promptForPlayerOption))
+  .then(setState(promptForPlayerTarget))
+  .then(setState(submitPlayerChoice))
+  .then(setState(waitForPlayersActions))
+  // .them(animatePlayerAction)
+  // .them(animateOtherPlayersActions)
+  .then(setState(applyActionEffects))
+  // .then(setState(displayRewards))
+  .then(setState(mainLoop))
 }
 
-function gameStart () {
-  createCardDecks()
 
+
+function gameStart () {
   requestAnimationFrame(() => {
-    const name = prompt('Your name?', `Anon${Math.round(100 + Math.random() * 899)}`)
-    document.body.style.opacity = '1'
-    renderMessages([WAITING])
-    joinGame(name)
+    setState(promptPlayerName)()
+    .then((name) => {
+      inputHandler = buttonInputHandler
+      renderMessages([WAITING], startGame, 'Start_against_PC')
+      joinGame(name)
+    })
   });
 }

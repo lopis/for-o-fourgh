@@ -23,15 +23,25 @@ function bind() {
   })
 
   socket.on('updateUsers', (users: Player[]) => {
-    console.log('updateUsers', users.map(u => u.nextChoice))
+    console.log('updateUsers', users.map(u => ({...u})))
     localPlayer = users.find(player => player.id === socket.id)
     players = users
     players.forEach(player => {
       player.stats = playerStats[player.id] || {...DEFAULT_STATS}
       playerStats[player.id] = player.stats
     })
-    renderPlayers()
-    renderPlayerCards()
+    if (gameState === 'lobby') {
+      players.forEach((player: Player, index) => {
+        const $player: HTMLElement = document.querySelector(`.hidden .char.${player.char}`)
+        if ($player) {
+          document.querySelector('.map').appendChild($player)
+          resetPlayerPosition(player, index)
+        }
+      })
+      locations[5].players = users
+      renderPlayers()
+    }
+    renderPlayerStats()
   })
 }
 
@@ -47,10 +57,12 @@ function joinGame (name: string) {
   socket.emit('join', name)
 }
 
-function submitPlayerChoice (choice: Choice) {
+function submitPlayerChoice (resolve: Function) {
+  const choice: Choice = localPlayer.nextChoice
   console.log('Submit choice', {...choice});
 
   socket.emit('choice', choice)
+  resolve()
 }
 
 function submitMove () {
@@ -61,3 +73,6 @@ function submitReset () {
   socket.emit('resetChoice')
 }
 
+function startGame () {
+  socket.emit('forceStart')
+}

@@ -11,37 +11,78 @@ const locations: GameLocation[] = [
   TEMPLE,
   EDEN,
   HELL,
+  PLAZA,
 ].map((name: LocationName, index: number) => ({index: index+1, name, players: []}))
 
-const locationActions: {[name in LocationName]: LocationOption[]} = {
+const locationActions: {[name in LocationName]: LocationAction[]} = {
   bank: [{
     name: 'Interest Return',
     labels: ['💰 + 💰 / 5 ⚜️'],
-    effect(player: Player) {
+    effect (player: Player) {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.stats.gold += 1 + Math.floor(player.stats.influence / 5)
     },
-    disabled: (player: Player) => false
+    disabled: (player: Player) => false,
+    getMessage (player: Player) {
+      return `got ${1 + Math.floor(player.stats.influence / 5)} gold from interest.`
+    }
   }],
 
   court: [
     {
-      name: 'Draw Policy',
-      labels: ['draw 1 📜'],
-      effect(player: Player) {
-        drawCard('policies')
+      name: 'Tax Reform',
+      labels: ['Tax rich or all?'],
+      options: [
+        {
+          name: 'Tax Richest',
+          labels: ['Richest 👤 -2💰'],
+          effect (player: Player) {
+            const sortedArray: Player[] = [...players].sort(
+              (a: Player, b: Player) => {
+                return a.stats.gold > b.stats.gold ? 1
+                  : a.stats.gold < b.stats.gold ? -1
+                  : 0
+              }
+            )
+            const richestPlayer = sortedArray.pop()
+            richestPlayer.stats.gold -= 2
+
+            player.nextChoice.target = players.findIndex(player => player === richestPlayer)
+          }
+        },
+        {
+          name: 'Tax all',
+          labels: ['All players -1💰'],
+          effect () {
+            players.forEach(player => {
+              player.stats.gold--
+            })
+            renderMessages([
+              `Each player was taxed 1💰`
+            ])
+          }
+        }
+      ],
+      effect (player: Player) {
+
       },
-      disabled: (player: Player) => false
+      disabled: () => false,
+      getMessage (player: Player) {
+        return `Player ${player.nextChoice.target}`
+      }
     },
     {
       name: 'Embezzlement',
       labels: ['-1 ⚜️', '+2 💰', , '+1 🏺'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.influence -= 1
         player.stats.gold += 2
         player.stats.relics += 1
       },
-      disabled: (player: Player) => player.stats.influence < 1
+      disabled: (player: Player) => player.stats.influence < 1,
+      getMessage () {
+        return 'embezzled gold and relics.'
+      }
     }
   ],
 
@@ -49,103 +90,161 @@ const locationActions: {[name in LocationName]: LocationOption[]} = {
     {
       name: 'Offering',
       labels: ['-1 🏺', '+3 ⚜️'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.influence += 3
         player.stats.relics -= 1
       },
-      disabled: (player: Player) => player.stats.relics < 1
+      disabled: (player: Player) => player.stats.relics < 1,
+      getMessage () {
+        return 'donated a relic to the temple'
+      }
     },
     {
       name: 'Donation',
       labels: ['-1 💰', '+1 ⚜️'],
-      effect(player: Player) {
+      effect (player: Player) {
         player.stats.gold--
         player.stats.influence++
       },
-      disabled: (player: Player) => player.stats.gold < 1
+      disabled: (player: Player) => player.stats.gold < 1,
+      getMessage () {
+        return 'made a gold donation to the temple'
+      }
     },
     {
       name: 'Skip',
       labels: ['🙏'],
-      effect() {},
+      effect () {},
       disabled: () => false,
+      getMessage () {
+        return 'is praying at the temple'
+      }
     }
   ],
 
   eden: [
     {
       name: 'Blessing',
-      labels: ['draw 1 ✨'],
-      effect() {
-        drawCard('blessings')
+      labels: ['Random Blessing'],
+      effect (player: Player) {
+        // TODO: apply effect of the action+option+player choice
       },
-      disabled: () => false
+      disabled: () => false,
+      getMessage (player: Player) {
+        return 'not implemented'
+      }
     }
   ],
 
   hell: [
     {
       name: 'Wrath',
-      labels: ['draw 1 💢'],
-      effect(player: Player) {
-        drawCard('damnations')
+      labels: ['Random damnation'],
+      effect (player: Player) {
+        // TODO: apply effect of the action+option+player choice
       },
-      disabled: () => false
+      disabled: () => false,
+      getMessage (player: Player) {
+        return 'not implemented'
+      }
     }
   ],
 }
 
-const decks: {[name in DeckName]: Card[]}= {
-  policies: [
-    {
-      name: 'Blackmail',
-      label: 'Steal 5 💰 or 2 ⚜️ from player',
-    },
-    {
-      name: 'Grant',
-      label: 'Steal 1 relic',
-      choosePlayer: true
-    },
-    {
-      name: 'Tax Reform',
-      options: [
-        {
-          name: 'Tax richest </br> 2💰'
-        },
-        {
-          name: 'Tax all 👥 </br> 1💰'
-        }
-      ]
-    }
-  ],
-  blessings: [
-    {
-      name: 'Ancient Relic',
-      options: [
-        {
-          name: 'Sell +1 💰'
-        },
-        {
-          name: 'Keep + 1 🏺'
-        }
-      ]
-    },
-    {
-      name: 'Divine Sanction',
-      label: 'Players on Temple/Sky +1⚜️'
-    },
-    {
-      name: 'Judgement',
-      label: '👤 on Eden +2⚜️ <br>👤 on Hell -2⚜️'
-    }
-  ],
-  damnations: [
-    {
-      name: 'Deluge',
-      label: 'Players on Earth -1⚜️'
-    }
-  ]
-}
+// const decks = {
+//   policies: [
+//     {
+//       name: 'Blackmail',
+//       label: 'Steal 5 💰 or 2 ⚜️ from player',
+//     },
+//     {
+//       name: 'Lawsuit',
+//       label: 'Steal 1 relic',
+//       choosePlayer: true
+//     },
+//     {
+//       name: 'Tax Reform',
+//       options: [
+//         {
+//           name: 'Tax richest </br> 2💰',
+//           title: 'Tax richest player',
+//           effect () {
+//             const sortedArray = [...players].sort(
+//               (a: Player, b: Player) => {
+//                 return a.stats.gold > b.stats.gold ? 1
+//                   : a.stats.gold < b.stats.gold ? -1
+//                   : 0
+//               }
+//             )
+//             const richestPlayer = sortedArray.pop()
+//             richestPlayer.stats.gold -= 2
+//             renderMessages([
+//               `Player ${richestPlayer.name} was taxed 2💰`
+//             ])
+//           }
+//         },
+//         {
+//           name: 'Tax all 👥 </br> 1💰',
+//           title: 'Tax all players',
+//           effect () {
+//             players.forEach(player => {
+//               player.stats.gold--
+//             })
+//             renderMessages([
+//               `Each player was taxed 1💰`
+//             ])
+//           }
+//         }
+//       ]
+//     }
+//   ],
+//   blessings: [
+//     {
+//       name: 'Ancient Relic',
+//       options: [
+//         {
+//           name: 'Sell +1 💰',
+//           title: 'Sell Relic',
+//           effect (player: Player) {
+//             player.stats.gold++
+//           }
+//         },
+//         {
+//           name: 'Keep + 1 🏺',
+//           title: 'Keep Relic',
+//           effect (player: Player) {
+//             player.stats.relics++
+//           }
+//         }
+//       ]
+//     },
+//     {
+//       name: 'Divine Sanction',
+//       label: 'Players on Temple/Sky +1⚜️',
+//       message: '+1 influence to players on temple or sky'
+//     },
+//     {
+//       name: 'Judgement',
+//       label: '👤 on Eden +2⚜️ <br>👤 on Hell -2⚜️',
+//       message: '+2 influence to players in Eden, -2 in Hell'
+//     }
+//   ],
+//   damnations: [
+//     {
+//       name: 'Deluge',
+//       label: 'Players on Earth -1⚜️',
+//       message: '-1 influence to players on earth'
+//     }
+//   ]
+// }
+
+// const locationDecks: {[name in LocationName]: DeckName} = {
+//   bank: null,
+//   temple: null,
+//   court: 'policies',
+//   eden: 'blessings',
+//   hell: 'damnations'
+// }
 
 function updatePlayerLocation () {
   players.forEach(player => {
@@ -166,29 +265,9 @@ function updatePlayerLocation () {
     resetPlayerChoice(player)
   })
   renderPlayers()
-  renderPlayerCards()
+  renderPlayerStats()
   submitMove()
 }
-
-function createCardDecks () {
-  Object.entries(decks).forEach(([deckName, deck]) => {
-    let cards: Card[] = []
-    deck.forEach((card) => {
-      // Adds same card multiple times
-      for (let i = 0; i < CARD_COUNT; i++) {
-        cards.push({...card})
-      }
-    })
-    shuffleArray(cards)
-
-    cards.forEach((card) => renderCard(card, deckName as DeckName))
-  })
-}
-
-function drawCard (deckName : DeckName) {
-  animateCardFlip(deckName)
-}
-
 
 function resetPlayerChoice (player: Player) {
   player.nextChoice = {
@@ -201,5 +280,4 @@ function resetPlayerChoice (player: Player) {
 
 function setPlayerChoice (optionIndex: number, type: ChoiceType) {
   localPlayer.nextChoice[type] = optionIndex
-  submitPlayerChoice(localPlayer.nextChoice)
 }

@@ -4,6 +4,7 @@ const COURT = 'court'
 const TEMPLE = 'temple'
 const EDEN = 'eden'
 const HELL = 'hell'
+const PLAZA = 'plaza'
 
 const GOLD = 'gold'
 const INFLUENCE = 'influence'

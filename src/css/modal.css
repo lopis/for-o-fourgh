@@ -1,0 +1,64 @@
+.modal {
+  position: fixed;
+  top: 0;
+	height: 100%;
+	width: 100%;
+	background: #4a5360;
+	z-index: 1;
+	display: flex;
+  flex-direction: column;
+  align-items: center;
+	justify-content: center;
+}
+
+.modal .text {
+  color: #fff8e3;
+  padding: var(--pixel-size);
+  margin: var(--pixel-size);
+}
+
+.modal .btn {
+  color: #504c40;
+}
+
+.modal .input {
+  background: #fff8e3;
+  color: #504c40;
+  --dot-size: var(--pixel-size) * 2;
+}
+
+.modal input {
+	position: absolute;
+	top: -100%;
+}
+
+.modal input,
+.modal .input {
+  height: calc(var(--pixel-size) * 7);
+  width: calc(var(--pixel-size) * 4 * 8);
+  border: 0;
+  padding: var(--pixel-size);
+  box-sizing: border-box;
+}
+
+.modal .input .word:last-child .letter:last-child {
+  opacity: 50%;
+  animation: blink 500ms infinite;
+  animation-timing-function: steps(1);
+}
+
+.modal p {
+	color: #fff8e3;
+	max-width: 500px;
+	width: 100%;
+	text-shadow: 0 0 1px #504c40;
+}
+
+@keyframes blink {
+  0% {
+    color: currentColor;
+  }
+  50% {
+    color: transparent;
+  }
+}

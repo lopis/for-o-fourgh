@@ -4,28 +4,10 @@
   animation: map 2s infinite;
   height: calc(var(--pixel-size) * 64);
   width: calc(var(--pixel-size) * 64);
-  image-rendering: pixelated;
-  image-rendering: optimizespeed;
   position: relative;
-  border: var(--pixel-size) solid #c4bfb0;
-  margin: calc(2 * var(--pixel-size)) 0;
-}
-
-.map::after, .map::before {
-	content: "";
-	border: var(--pixel-size) solid #c4bfb0;
-	position: absolute;
-	left: calc(var(--pixel-size) * -2);
-	width: calc(100% + 2 * var(--pixel-size));
-	height: calc(100% - 2 * var(--pixel-size));
-	z-index: -1;
-}
-
-.map::after {
-	width: calc(100% - 2 * var(--pixel-size));
-  height: calc(100% + 2 * var(--pixel-size));
-  left: 0;
-  top: calc(var(--pixel-size) * -2);
+  box-shadow: 0 0 0 calc(var(--pixel-size) * 2) #c4bfb0;
+  margin: calc(4 * var(--pixel-size));
+  overflow: hidden;
 }
 
 @keyframes map {
@@ -48,7 +30,7 @@
 
 .map .tiny-font {
 	position: absolute;
-	bottom: calc(var(--pixel-size) * -3);
+  opacity: 0.8;
 }
 
 .bank {
@@ -56,15 +38,24 @@
   left: calc(var(--pixel-size) * 4);
 }
 
+.bank .tiny-font,
+.court .tiny-font,
+.temple .tiny-font {
+  bottom: calc(var(--pixel-size) * -3);
+}
+
+.eden .text, .hell .text {
+	top: calc(var(--pixel-size) * 9);
+}
+
 .court {
   bottom: calc(var(--pixel-size) * 4);
   right: calc(var(--pixel-size) * 4);
   justify-content: flex-end;
 }
-
 .temple {
   top: calc(var(--pixel-size) * 25);
-  width: 100%;
+  left: 50%;
   justify-content: center;
 }
 
@@ -79,54 +70,30 @@
   justify-content: flex-end;
 }
 
+.plaza {
+	bottom: calc(var(--pixel-size) * 4);
+	left: 50%;
+}
+
 .char {
   background-image: url('characters.png');
   background-size: calc(var(--pixel-size) * 20) calc(var(--pixel-size) * 27);
   height: calc(var(--pixel-size) * 9);
   width: calc(var(--pixel-size) * 4);
   display: inline-block;
-  margin-right: calc(var(--pixel-size) * 1);
+}
+
+.map .char {
+  position: absolute;
+  margin-left: calc(var(--pixel-size) * -2);
+  top: 0;
+  left: 0;
+  transition: transform 1s linear;
+  transition-timing-function: steps(10);
 }
 
 .char.animated {
-  position: relative;
   animation: walk 0.3s steps(1) infinite;
-}
-
-@keyframes walk {
-  0% {
-    background-position-y: 50%;
-  }
-  50% {
-    background-position-y: 100%;
-  }
-  100% {
-    background-position-y: 50%;
-  }
-}
-
-@keyframes move {
-  0% {
-    left: 0px;
-  }
-  50% {
-    left: calc(var(--pixel-size) * 30);
-  }
-  100% {
-    left: 0px;
-  }
-}
-
-@keyframes flip {
-  0% {
-    transform: scaleX(1);
-  }
-  50% {
-    transform: scaleX(-1);
-  }
-  100% {
-    transform: scaleX(1);
-  }
 }
 
 .temple .char:nth-child(2n):last-child,
@@ -152,4 +119,16 @@
 
 .dissident {
   background-position-x: 50%;
+}
+
+@keyframes walk {
+  0% {
+    background-position-y: 50%;
+  }
+  50% {
+    background-position-y: 100%;
+  }
+  100% {
+    background-position-y: 50%;
+  }
 }

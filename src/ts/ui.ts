@@ -1,6 +1,8 @@
+let pixelSize = 1
+
 function renderButtons (
   title : string,
-  options : Option[],
+  options : ButtonOption[],
   type : ChoiceType,
   waitingTitle?: string
 ) {
@@ -32,28 +34,111 @@ function renderButtons (
   })
 }
 
-function renderMessages (messages: string[]) {
+function renderMessages (messages: string[], dismissCallback?: Function, dismissText?: string) {
   document.querySelector('.actions .options').innerHTML = ''
   document.querySelector('.actions .title').innerHTML = messages.map(
-    message => `<div class="text">${message}</div>`
+    (message, index) => `<div class="${index > 0 ? 'message' : 'text'}">${message}</div>`
   ).join('')
+
+  if (dismissCallback) {
+    const button = document.createElement('div')
+    button.innerHTML = dismissText
+    button.className = 'btn text'
+    button.onclick = () => dismissCallback()
+    document.querySelector('.actions .options').appendChild(button)
+  }
+
   applyTinyFont('.actions .text')
 }
 
+const CHAR_WIDTH = 4
+const charPos: {[char: string]: {x: number, y: number}} = {}
+
+function resetPlayerPosition (player: Player, index: number) {
+  const $player: HTMLElement = document.querySelector(`.map .${player.char}`)
+  let x, y
+  if (players.indexOf(player) % 2 === 0) {
+    x = -4 - (index * CHAR_WIDTH)
+    y = 51
+  } else {
+    x = 68 + (index * CHAR_WIDTH)
+    y = 51
+  }
+  charPos[player.char] = {x, y}
+  $player.style.transform =
+      `translateX(calc(var(--pixel-size) * ${x})) translateY(calc(var(--pixel-size) * ${y}))`
+}
+
+let renderingSemaphore = 0
 function renderPlayers () {
-  locations.forEach(location => {
-    location.players.forEach(player => {
-      document.querySelector(`.${location.name}`).appendChild(
-        document.querySelector(`.map .char.${player.char}`)
-      )
-    })
+  players.forEach((player: Player, index) => {
+    renderingSemaphore++
+    const $player : HTMLElement = document.querySelector(`.map .char.${player.char}`)
+    const location = locations[player.location - 1]
+    const locationName = location.name
+    const $location : HTMLElement = document.querySelector(`.${locationName}`)
+
+    let x = $location.offsetLeft / pixelSize
+    let y = $location.offsetTop / pixelSize
+
+    let playerIndex = location.players.indexOf(player)
+    if ([COURT, HELL].includes(locationName)) {
+      x -= (playerIndex) * (CHAR_WIDTH + 1)
+    } else  if ([TEMPLE, PLAZA].includes(locationName)) {
+      if (playerIndex % 2) {
+        x += ((1 + playerIndex) / 2) * (CHAR_WIDTH + 1)
+      } else {
+        x -= (playerIndex / 2) * (CHAR_WIDTH + 1)
+      }
+    } else {
+      x += (playerIndex) * (CHAR_WIDTH + 1)
+    }
+
+    const moveX = () => {
+      const distance = charPos[player.char].x - x
+      const duration = Math.abs(distance) * 30
+      const steps = Math.round(Math.abs(distance) / 2)
+      $player.style.transition = `transform ${duration}ms linear`
+      $player.style.transitionTimingFunction = `steps(${steps})`
+      $player.style.transform = $player.style.transform.replace(/translateX\(.+\) t/, `translateX(${x * pixelSize}px) t`)
+      return duration
+    }
+
+    const moveY = () => {
+      const distance = charPos[player.char].y - y
+      const duration = Math.abs(distance) * 30
+      const steps = Math.round(Math.abs(distance) / 2)
+      $player.style.transition = `transform ${duration}ms linear`
+      $player.style.transitionTimingFunction = `steps(${steps})`
+      $player.style.transform = $player.style.transform.replace(/translateY\(.+\)/, `translateY(${y * pixelSize}px)`)
+      return duration
+    }
+
+    $player.classList.add('animated')
+    if (![TEMPLE].includes(locationName)) {
+      setTimeout(() => {
+        setTimeout(() => {
+          $player.classList.remove('animated')
+          charPos[player.char] = {x, y}
+          renderingSemaphore--
+        }, moveX() + 100)
+      }, moveY() + 100)
+    } else {
+      setTimeout(() => {
+        setTimeout(() => {
+          $player.classList.remove('animated')
+          charPos[player.char] = {x, y}
+          renderingSemaphore--
+        }, moveY() + 100)
+      }, moveX() + 100)
+    }
   })
 }
 
-function renderPlayerCards () {
+function renderPlayerStats () {
   document.querySelector('.stats').innerHTML = players.map(
     player =>
-    `<div class="player ${player.char}">
+    `<div class="player ${player.char}${player === localPlayer ? ' local' : ''}">
       <div class="avatar char ${player.char}"></div>
       <div>
         <div class="text gold">${player.stats.gold}</div>
@@ -65,7 +150,7 @@ function renderPlayerCards () {
   applyTinyFont()
 }
 
-function updatePlayerCards () {
+function updatePlayerStats () {
   players.forEach(player => {
     document.querySelector(`.player.${player.char} .gold`).innerHTML = `${player.stats.gold}`
     document.querySelector(`.player.${player.char} .relics`).innerHTML = `${player.stats.relics}`
@@ -77,7 +162,7 @@ function updatePlayerCards () {
 function renderLocations () {
   renderButtons(
     'Go to',
-    locations.map(
+    [...locations].splice(0,5).map(
       ({name, index}) => ({
         title: name,
         html: `${index}._${name}`,
@@ -94,7 +179,7 @@ function renderLocations () {
 function renderActions () {
   const location = localPlayer.location
   const locationName: LocationName = locations[location - 1].name
-  const actions: LocationOption[] = locationActions[locationName]
+  const actions: LocationAction[] = locationActions[locationName]
 
   renderButtons('Choose an action', actions.map(
     (action, index) => ({
@@ -107,6 +192,29 @@ function renderActions () {
   applyTinyFont('.action-title')
 }
 
+function renderOptions (options: ActionOption[]) {
+  renderButtons(`Choose an option`, options.map(
+    (option: ActionOption, index: number) => ({
+      title: option.name,
+      disabled: false,
+      html: `<div class="action-title">${index + 1}._${option.name}</div>
+      <div class="labels">${option.labels.map(label => `<div>${label}</div>`).join('')}</div>`
+    })
+  ), 'option')
+  applyTinyFont('.action-title')
+}
+
+function renderTargetPlayers () {
+  renderButtons('Choose target player', players.filter(p => p !== localPlayer).map(
+    (player: Player, index: number) => ({
+      title: '',
+      disabled: false,
+      html: `<div class="action-title">${player.name}</div><div class="char ${player.char}"></div>`,
+    })
+  ), 'target')
+  applyTinyFont('.action-title')
+}
+
 function adjustUIScale () {
   const updatePixelSize = () => {
     const smallestSize = Math.min(
@@ -114,35 +222,10 @@ function adjustUIScale () {
       document.documentElement.clientWidth - 150
     )
 
-    document.body.style.setProperty('--pixel-size', `${Math.round(smallestSize / 110)}px`)
+    pixelSize = 2 * Math.round(smallestSize / 220)
+    document.body.style.setProperty('--pixel-size', `${pixelSize}px`)
   }
 
   window.onresize = updatePixelSize
   updatePixelSize()
-}
-
-function renderCard (card: Card, deck: DeckName) {
-  const cardElement = document.createElement('div')
-
-  cardElement.className = 'card'
-  cardElement.innerHTML = [
-    `<div class="front"></div>`,
-      `<div class="back">`,
-      `<p>${card.name}</p>`,
-      card.label ? `<p>${card.label}</p>` : '',
-      (card.options || []).map(option => `<p class="card-option">${option.name}</p>`).join(''),
-
-    `</div>`
-  ].join('')
-
-  document.querySelector(`.deck.${deck}`).append(cardElement)
-}
-
-function animateCardFlip (deckName: string) {
-  const topCard = Array.from(document.querySelectorAll(`.deck.${deckName} .card:not(.flip)`)).pop()
-
-  topCard.classList.add('flip')
-  setTimeout(() => {
-    topCard.parentElement.removeChild(topCard)
-  }, CARD_TIMEOUT)
 }

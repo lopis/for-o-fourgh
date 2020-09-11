@@ -18,8 +18,8 @@ const letters: FontData = {
   "*": 0xaa8,
   "-": 0x1c0,
 
-  "a": 0x2b7d,
-  "b": 0b111101110101111,
+  "a": 0x7b7d,
+  "b": 0x7baf,
   "c": 0x7927,
   "d": 0x6b6e,
   "e": 0x79a7,
@@ -31,7 +31,7 @@ const letters: FontData = {
   "k": 0x5bad,
   "l": 0x4927,
   "n": 0x6b6d,
-  "o": 0x7b6f,
+  "o": 0x3b6e,
   "p": 0x7be4,
   "q": 0x7b66,
   "r": 0x6b75,
@@ -45,6 +45,7 @@ const letters: FontData = {
 }
 
 const narrowLetters: FontData = {
+  "|": 0b11111,
   "1": 0b11111,
   ".": 0b00001,
   ",": 0b00011,
