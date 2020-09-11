@@ -3,7 +3,7 @@
 let users: User[] = [];
 let bots: User[] = [];
 let characters = ["saint", "baal", "marx", "dissident", "devotee"];
-let PLAYER_NUM = 2;
+let PLAYER_NUM = 5;
 const PLAZA_LOCATION = 6;
 
 function removePlayer(user: User) {
@@ -133,22 +133,28 @@ class User {
   }
 }
 
+function sanitizeChoice (choice: any) {
+  const {location, action, option, target} = choice
+  return {
+    location: Number.isInteger(location) ? location : null,
+    action: Number.isInteger(action) ? action : null,
+    option: Number.isInteger(option) ? option : null,
+    target: Number.isInteger(target) ? target : null,
+  }
+}
+
 /**
  * Socket.IO on connect event
  * @param {Socket} socket
  */
 module.exports = {
 
-  // TODO: SANITATION OF ALL COMMANDS
-  // high risk of XSS
-
 	io: (socket: SocketIO.Socket) => {
 		const user = new User(socket);
     users.push(user);
 
 		socket.on("join", (name: string) => {
-      joinBotPlayer();
-      user.name = name;
+      user.name = name.substr(0, 7);
 			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
 
       users.forEach(user => user.updateUsers())
@@ -159,14 +165,13 @@ module.exports = {
     });
 
 		socket.on("disconnect", () => {
-      removeBot();
       console.log("Disconnected: " + socket.id);
       characters.push(user.char);
 			removePlayer(user);
     });
 
 		socket.on("choice", (choice) => {
-      const {location, action, option, target} = choice;
+      const {location, action, option, target} = sanitizeChoice(choice);
       if (Number.isInteger(location)) {
         console.log(`Player ${user.name} goes to ${location}`);
         playBotLocation();
@@ -193,6 +198,12 @@ module.exports = {
       user.nextChoice = {}
       resetBotChoice();
     });
+
+    socket.on("forceStart", () => {
+      for (let index = PLAYER_NUM; index > users.length; index--) {
+        joinBotPlayer();
+      }
+    })
 
 		console.log("Connected: " + socket.id);
   }
