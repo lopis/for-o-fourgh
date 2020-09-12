@@ -33,8 +33,8 @@ function removeBots () {
     console.log('Bot left the game');
     removePlayer(bot);
     characters.push(bot.char);
-    bots.splice(bots.indexOf(bot), 1);
   })
+  bots = []
 }
 
 function setBotLocation () {
@@ -173,7 +173,7 @@ module.exports = {
       if (users.every(user => user.isBot)) {
         users = []
         removeBots()
-        bots = []
+        characters = initialChars
       }
       users.forEach(user => user.updateUsers())
     });
@@ -236,7 +236,8 @@ module.exports = {
         id,
         nextChoice,
         location,
-      }))
+      })),
+      characters
     });
 	},
 
