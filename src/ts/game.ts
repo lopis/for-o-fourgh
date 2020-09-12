@@ -87,13 +87,14 @@ const applyActionEffects = (resolve: Function) => {
 
     const nextAction = locationActions[locationName][player.nextChoice.action - 1]
 
-    console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
-    messages.push(`<strong>${player.name}</strong> ${nextAction.getMessage(player)}`)
-    resetPlayerChoice(player)
-
-    if (!nextAction.disabled(player)) {
-      nextAction.effect(player)
+    if (nextAction && !nextAction.disabled(player)) {
+      console.log(`Player ${player.name} performs ${nextAction.name} in ${locationName}`);
+      // messages.push(`<strong>${player.name}</strong> ${nextAction.getMessage(player)}`)
+      const message = nextAction.effect(player, nextAction)
+      messages.push(message)
     }
+
+    resetPlayerChoice(player)
     updatePlayerStats()
   })
 
@@ -128,6 +129,8 @@ const setState = (stateFunction: (resolve: Function) => any): () => Promise<any>
 }
 
 const mainLoop = () => {
+  round++
+
   setState(waitForAnimations)()
   .then(setState(promptNextLocation))
   .then(setState(submitPlayerChoice))

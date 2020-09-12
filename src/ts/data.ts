@@ -4,6 +4,7 @@ let players: Player[] = []
 let localPlayer: Player = null
 let playerStats: {[playerId: string]: PlayerStats} = {}
 let gameState: GameState = 'lobby'
+let round = 0
 
 const locations: GameLocation[] = [
   BANK,
@@ -21,11 +22,10 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
     effect (player: Player) {
       // Get 1 Gold + 1 Gold per each 5 Influence
       player.stats.gold += 1 + Math.floor(player.stats.influence / 5)
+
+      return `${player.name} earned ${1 + Math.floor(player.stats.influence / 5)} gold from interest.`
     },
     disabled: (player: Player) => false,
-    getMessage (player: Player) {
-      return `got ${1 + Math.floor(player.stats.influence / 5)} gold from interest.`
-    }
   }],
 
   court: [
@@ -35,7 +35,7 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
       options: [
         {
           name: 'Tax Richest',
-          labels: ['Richest 👤 -2💰'],
+          labels: ['Richest 👤 -20% 💰'],
           effect (player: Player) {
             const sortedArray: Player[] = [...players].sort(
               (a: Player, b: Player) => {
@@ -45,31 +45,35 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
               }
             )
             const richestPlayer = sortedArray.pop()
-            richestPlayer.stats.gold -= 2
+            const tax = Math.floor(richestPlayer.stats.gold * 0.20)
+            richestPlayer.stats.gold -= tax
 
             player.nextChoice.target = players.findIndex(player => player === richestPlayer)
+
+            return `Player ${richestPlayer.name} was taxed ${tax} 💰 by player ${player.name}`
           }
         },
         {
           name: 'Tax all',
-          labels: ['All players -1💰'],
-          effect () {
+          labels: ['All players -10% 💰'],
+          effect (player: Player) {
             players.forEach(player => {
-              player.stats.gold--
+              const tax = Math.floor(player.stats.gold * 0.10)
+              player.stats.gold -= tax
             })
-            renderMessages([
-              `Each player was taxed 1💰`
-            ])
+
+            return `Each player was taxed 10% 💰 by player ${player.name}`
           }
         }
       ],
-      effect (player: Player) {
-
+      effect (player: Player, action: LocationAction) {
+        const option = action.options[player.nextChoice.option - 1]
+        if (!option) {
+          console.error('option not found', player.nextChoice.option, player);
+        }
+        return option.effect(player)
       },
       disabled: () => false,
-      getMessage (player: Player) {
-        return `Player ${player.nextChoice.target}`
-      }
     },
     {
       name: 'Embezzlement',
@@ -78,11 +82,9 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
         player.stats.influence -= 1
         player.stats.gold += 2
         player.stats.relics += 1
+        return `${player.name} embezzled gold and relics.`
       },
       disabled: (player: Player) => player.stats.influence < 1,
-      getMessage () {
-        return 'embezzled gold and relics.'
-      }
     }
   ],
 
@@ -93,11 +95,9 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
       effect (player: Player) {
         player.stats.influence += 3
         player.stats.relics -= 1
+        return `${player.name} donated a relic to the temple`
       },
       disabled: (player: Player) => player.stats.relics < 1,
-      getMessage () {
-        return 'donated a relic to the temple'
-      }
     },
     {
       name: 'Donation',
@@ -105,20 +105,18 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
       effect (player: Player) {
         player.stats.gold--
         player.stats.influence++
+        return `${player.name} made a gold donation to the temple`
       },
       disabled: (player: Player) => player.stats.gold < 1,
-      getMessage () {
-        return 'made a gold donation to the temple'
-      }
     },
     {
-      name: 'Skip',
+      name: 'Pray',
       labels: ['🙏'],
-      effect () {},
+      effect (player: Player) {
+        player.stats.prayCount++
+        return `${player.name} is praying at the temple`
+      },
       disabled: () => false,
-      getMessage () {
-        return 'is praying at the temple'
-      }
     }
   ],
 
@@ -127,28 +125,102 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
       name: 'Blessing',
       labels: ['Random Blessing'],
       effect (player: Player) {
-        // TODO: apply effect of the action+option+player choice
+        return `${player.name} was blessed`
       },
       disabled: () => false,
-      getMessage (player: Player) {
-        return 'not implemented'
-      }
-    }
+    },
+    {
+      name: 'Enlightenment',
+      labels: ['Get 1 ⚜️ per Pray 🙏'],
+      effect (player: Player) {
+        player.stats.influence += player.stats.prayCount
+        return `${player.name} received enlightenment: ${player.stats.prayCount} ⚜️`
+      },
+      disabled: () => false,
+    },
+    {
+      name: 'Judgement',
+      labels: ['no pray = -1 ⚜️'],
+      effect (player: Player) {
+        const noPrayers = players.filter(player => player.stats.prayCount == 0)
+        noPrayers.map(player => player.stats.influence--)
+
+        return `${noPrayers.map(p=>p.name).join(', ')} received judgement from not praying: -1 ⚜️`
+      },
+      disabled: () => false,
+    },
   ],
 
   hell: [
     {
       name: 'Wrath',
-      labels: ['Random damnation'],
+      labels: ['-2 ⚜️ per sin'],
       effect (player: Player) {
-        // TODO: apply effect of the action+option+player choice
+        players.filter(p => p !== player).map(p => {
+          p.stats.influence -= player.stats.sinCount * 2
+        })
+        return `${player.name} caused non-prayers to lose ⚜️`
       },
       disabled: () => false,
-      getMessage (player: Player) {
-        return 'not implemented'
-      }
+    },
+    {
+      name: 'Deluge',
+      labels: ['Players on Earth -1 💰/🏺', '+1 💰/🏺 otherwise'],
+      effect (player: Player) {
+        return `${player.name} caused a damnation`
+      },
+      disabled: () => false,
+    },
+    {
+      name: 'Temptation',
+      labels: ['Cause player to sin'],
+      targetPlayer: true,
+      effect (player: Player) {
+        const targetPlayer = players[player.nextChoice.target - 1]
+        const sinName = Object.keys(sinsData)[round % 7] as SinName
+        sinsData[sinName](targetPlayer)
+
+        return `${player.name} made player ${targetPlayer.name} commit the sin of ${sinName}`
+      },
+      disabled: () => false,
     }
   ],
+}
+
+const sinsData: {[sin in SinName]: (player: Player) => void} = {
+  lust (player: Player) {
+    // Drag player to Hell. +1⚜️, -1💰
+    player.stats.sinCount++
+    // TODO: implement effect
+  },
+  gluttony (player: Player) {
+    // All players lose 1 🏺; player gets 1 🏺
+    player.stats.sinCount++
+    // TODO: implement effect
+  },
+  greed (player: Player) {
+    // All players lose 1 💰; player gets 2 💰
+    player.stats.sinCount++
+    // TODO: implement effect
+  },
+  sloth (player: Player) {
+    // prayer pray count = 0;
+    player.stats.sinCount++
+    // TODO: implement effect
+  },
+  wrath (player: Player) {
+    // target loses 2 ⚜️
+  },
+  envy (player: Player) {
+    // All players lose 1 💰/🏺;
+    player.stats.sinCount++
+    // TODO: implement effect
+  },
+  pride (player: Player) {
+    // All players lose 1 ⚜️
+    player.stats.sinCount++
+    // TODO: implement effect
+  }
 }
 
 // const decks = {

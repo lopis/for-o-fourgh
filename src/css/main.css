@@ -4,7 +4,7 @@ html, body {
 }
 
 body {
-  font-size: 2vh;
+  font-size: calc(var(--pixel-size) * 2);
   background: linear-gradient(#4a5360 40%,#72795c 40%);
   box-sizing: border-box;
   padding: var(--pixel-size);

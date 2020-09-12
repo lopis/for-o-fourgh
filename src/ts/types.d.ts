@@ -1,6 +1,7 @@
 type LocationName = 'bank' | 'court' | 'temple' | 'eden' | 'hell';
 type Character = 'devotee' | 'saint' | 'baal' | 'marx' | 'dissident'
 type GameState = 'lobby' | 'start' | 'end'
+type SinName = 'lust' | 'gluttony' | 'greed' | 'sloth' | 'wrath' | 'envy' | 'pride'
 
 interface Player {
   name: string,
@@ -12,6 +13,8 @@ interface Player {
 }
 
 interface PlayerStats {
+  prayCount: number,
+  sinCount: number,
   gold: number,
   influence: number
   relics: number,
@@ -28,16 +31,16 @@ interface LocationAction {
   labels: string[],
   options?: ActionOption[],
   targetPlayer?: boolean,
-  effect: (player: Player) => void,
+  effect: (player: Player, action?: LocationAction) => string,
   disabled: (player: Player) => boolean,
-  getMessage: (player: Player) => string
 }
 
-interface Game {
-  players: Player[],
-  time: number,
-  locations: GameLocation[],
-}
+// interface Game {
+//   players: Player[],
+//   time: number,
+//   locations: GameLocation[],
+//   turn: number
+// }
 
 interface Action {
   index: number,

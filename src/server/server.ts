@@ -1,7 +1,7 @@
 "use strict";
 
 let users: User[] = [];
-let games: Game[] = [];
+let games: GameServer[] = [];
 const initialChars = ["saint", "baal", "marx", "dissident", "devotee"];
 const PLAYER_NUM = 5;
 const PLAZA_LOCATION = 6;
@@ -12,18 +12,17 @@ function findGame(user: User) {
   if (!game) {
     console.log('New game created');
 
-    game = new Game()
+    game = new GameServer()
     games.push(game)
   }
   game.join(user)
 }
 
-function removeGame (game: Game) {
+function removeGame (game: GameServer) {
   games.splice(games.indexOf(game), 1);
 }
 
 function removeUser(user: User) {
-  user.game.players.splice(user.game.players.indexOf(user), 1)
   users.splice(users.indexOf(user), 1);
 }
 
@@ -35,9 +34,9 @@ function getRandom (max: number) {
 }
 
 /**
- * Game class
+ * GameServer class
  */
-class Game {
+class GameServer {
 
   players: User[]
   bots: User[]
@@ -82,8 +81,8 @@ class Game {
   playBotsAction () {
     this.bots.forEach(bot => {
       bot.nextChoice = {
-        action: getRandom(100),
-        option: getRandom(100),
+        action: getRandom(2) + 1,
+        option: getRandom(1) + 1,
         target: this.getRandomPlayer(bot)
       }
       console.log(`Bot performs action ${bot.nextChoice.action}/${bot.nextChoice.option}/${bot.nextChoice.target}`);
@@ -98,7 +97,7 @@ class Game {
   }
 
   getRandomPlayer (except: User): number {
-    let rnd = getRandom(this.players.length - 1)
+    let rnd = getRandom(this.players.length - 1) + 1
     if (this.players[rnd] === except) {
       return this.getRandomPlayer(except)
     }
@@ -113,7 +112,7 @@ class Game {
 class User {
 
   socket: SocketIO.Socket;
-  game: Game = null;
+  game: GameServer = null;
   isBot: boolean = false;
   id: string;
   nextChoice: any = {};
@@ -188,6 +187,7 @@ module.exports = {
       const game = user.game
       removeUser(user);
       if (game) {
+        game.players.splice(game.players.indexOf(user), 1)
         game.characters.push(user.char);
         if (game.players.every(player => player.isBot)) {
           removeGame(game)
