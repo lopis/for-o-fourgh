@@ -108,9 +108,24 @@ const displayRewards = (resolve: Function) => {
 
 // Game checks if game-end conditions have been met
 const checkGameEnd = (resolve: Function) => {
-  // returns true if game should go on
+  const winners = players.filter(player => winningConditions[player.char]())
 
-  return true
+  if (winners.length > 0) {
+    const winnerNames = winners.map(player => `<div class="action-title">${player.name}</div>
+      <div class="char ${player.char}"></div>`
+    )
+    renderButtons(`Game Over. Winner${winners.length > 1 ? 's' : ''}:`, winners.map(
+      (player: Player, index: number) => ({
+        title: 'winner',
+        disabled: false,
+        html: `<div class="action-title">${player.name}</div><div class="char ${player.char}"></div>`,
+      })
+    ), 'target')
+    applyTinyFont('.action-title')
+    gameState = 'end'
+  }
+
+  requestAnimationFrame(() => resolve())
 }
 
 const waitForAnimations = (resolve: Function) => {
@@ -131,21 +146,24 @@ const setState = (stateFunction: (resolve: Function) => any): () => Promise<any>
 const mainLoop = () => {
   round++
 
-  setState(waitForAnimations)()
-  .then(setState(promptNextLocation))
-  .then(setState(submitPlayerChoice))
-  .then(setState(waitForPlayersLocation))
-  .then(setState(animatePlayers))
-  .then(setState(promptNextAction))
-  .then(setState(promptForPlayerOption))
-  .then(setState(promptForPlayerTarget))
-  .then(setState(submitPlayerChoice))
-  .then(setState(waitForPlayersActions))
-  // .them(animatePlayerAction)
-  // .them(animateOtherPlayersActions)
-  .then(setState(applyActionEffects))
-  // .then(setState(displayRewards))
-  .then(setState(mainLoop))
+  if (gameState === 'start') {
+    setState(waitForAnimations)()
+    .then(setState(promptNextLocation))
+    .then(setState(submitPlayerChoice))
+    .then(setState(waitForPlayersLocation))
+    .then(setState(animatePlayers))
+    .then(setState(promptNextAction))
+    .then(setState(promptForPlayerOption))
+    .then(setState(promptForPlayerTarget))
+    .then(setState(submitPlayerChoice))
+    .then(setState(waitForPlayersActions))
+    // .them(animatePlayerAction)
+    // .them(animateOtherPlayersActions)
+    .then(setState(applyActionEffects))
+    // .then(setState(displayRewards))
+    .then(setState(checkGameEnd))
+    .then(setState(mainLoop))
+  }
 }
 
 

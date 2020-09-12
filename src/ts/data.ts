@@ -223,100 +223,35 @@ const sinsData: {[sin in SinName]: (player: Player) => void} = {
   }
 }
 
-// const decks = {
-//   policies: [
-//     {
-//       name: 'Blackmail',
-//       label: 'Steal 5 💰 or 2 ⚜️ from player',
-//     },
-//     {
-//       name: 'Lawsuit',
-//       label: 'Steal 1 relic',
-//       choosePlayer: true
-//     },
-//     {
-//       name: 'Tax Reform',
-//       options: [
-//         {
-//           name: 'Tax richest </br> 2💰',
-//           title: 'Tax richest player',
-//           effect () {
-//             const sortedArray = [...players].sort(
-//               (a: Player, b: Player) => {
-//                 return a.stats.gold > b.stats.gold ? 1
-//                   : a.stats.gold < b.stats.gold ? -1
-//                   : 0
-//               }
-//             )
-//             const richestPlayer = sortedArray.pop()
-//             richestPlayer.stats.gold -= 2
-//             renderMessages([
-//               `Player ${richestPlayer.name} was taxed 2💰`
-//             ])
-//           }
-//         },
-//         {
-//           name: 'Tax all 👥 </br> 1💰',
-//           title: 'Tax all players',
-//           effect () {
-//             players.forEach(player => {
-//               player.stats.gold--
-//             })
-//             renderMessages([
-//               `Each player was taxed 1💰`
-//             ])
-//           }
-//         }
-//       ]
-//     }
-//   ],
-//   blessings: [
-//     {
-//       name: 'Ancient Relic',
-//       options: [
-//         {
-//           name: 'Sell +1 💰',
-//           title: 'Sell Relic',
-//           effect (player: Player) {
-//             player.stats.gold++
-//           }
-//         },
-//         {
-//           name: 'Keep + 1 🏺',
-//           title: 'Keep Relic',
-//           effect (player: Player) {
-//             player.stats.relics++
-//           }
-//         }
-//       ]
-//     },
-//     {
-//       name: 'Divine Sanction',
-//       label: 'Players on Temple/Sky +1⚜️',
-//       message: '+1 influence to players on temple or sky'
-//     },
-//     {
-//       name: 'Judgement',
-//       label: '👤 on Eden +2⚜️ <br>👤 on Hell -2⚜️',
-//       message: '+2 influence to players in Eden, -2 in Hell'
-//     }
-//   ],
-//   damnations: [
-//     {
-//       name: 'Deluge',
-//       label: 'Players on Earth -1⚜️',
-//       message: '-1 influence to players on earth'
-//     }
-//   ]
-// }
-
-// const locationDecks: {[name in LocationName]: DeckName} = {
-//   bank: null,
-//   temple: null,
-//   court: 'policies',
-//   eden: 'blessings',
-//   hell: 'damnations'
-// }
+const winningConditions: {[name in Character]: () => boolean} = {
+  devotee () {
+    // Saint has 10 💰 + 🏺 + ⚜️
+    const {stats} = players.find(player => player.char === 'saint')
+    return (stats.gold + stats.influence + stats.relics) >= 10
+  },
+  saint () {
+    // Total pray count > 15
+    return players.reduce((total, player) => {
+      return total + player.stats.prayCount
+    }, 0) > 15
+  },
+  baal () {
+    // Total sins committed > 15
+    return players.reduce((total, player) => {
+      return total + player.stats.sinCount
+    }, 0) >= 7
+  },
+  marx () {
+    // Saint, Devotee or Baal has zero influence
+    return !!players.find(player => {
+      return ['saint', 'devotee', 'baal'].includes(player.char) && player.stats.influence <= 0
+    })
+  },
+  dissident () {
+    // Total money > 20
+    return players.find(player => player.char === 'dissident').stats.gold >= 20
+  },
+}
 
 function updatePlayerLocation () {
   players.forEach(player => {

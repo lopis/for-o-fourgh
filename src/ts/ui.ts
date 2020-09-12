@@ -13,7 +13,7 @@ function renderButtons (
       button.innerHTML = option.html
       button.className = 'btn'
 
-      if (!option.disabled) {
+      if (!option.disabled && title !== 'winner') {
         button.onmousedown = () => {
           setPlayerChoice(index + 1, type)
           document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('pressed'))

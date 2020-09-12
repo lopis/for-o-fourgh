@@ -32,7 +32,7 @@ function bind() {
     })
     if (gameState === 'lobby') {
       players.forEach((player: Player, index) => {
-        const $player: HTMLElement = document.querySelector(`.hidden .char.${player.char}`)
+        const $player: HTMLElement = document.querySelector(`.board .hidden .char.${player.char}`)
         if ($player) {
           document.querySelector('.map').appendChild($player)
           resetPlayerPosition(player, index)

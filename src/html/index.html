@@ -8,6 +8,28 @@
 </head>
 <body>
   <h1 class="text title">For O'Foughr</h1>
+  <div class="board">
+    <div class="stats"></div>
+    <div class="map">
+      <span class="bank"><span class="text">bank</span></span>
+      <span class="court"><span class="text">court</span></span>
+      <span class="temple"><span class="text">temple</span></span>
+      <span class="eden"><span class="text">eden</span></span>
+      <span class="hell"><span class="text">hell</span></span>
+      <span class="plaza"></span>
+    </div>
+    <div class="hidden">
+      <div class="char animated devotee"></div>
+      <div class="char animated saint"></div>
+      <div class="char animated baal"></div>
+      <div class="char animated marx"></div>
+      <div class="char animated dissident"></div>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="title"></div>
+    <div class="options"></div>
+  </div>
   <div class="modal">
     <div class="text">Your name</div>
     <input class="hidden" type="text" maxlength="7" autofocus>
@@ -54,29 +76,6 @@
       Win: Total money > 20<br>
       Ace: Secularization: others players -1 ⚜️ per prayer<br>
     </p>
-  </div>
-  <div class="board">
-    <div class="stats"></div>
-    <div class="map">
-      <span class="bank"><span class="text">bank</span></span>
-      <span class="court"><span class="text">court</span></span>
-      <span class="temple"><span class="text">temple</span></span>
-      <span class="eden"><span class="text">eden</span></span>
-      <span class="hell"><span class="text">hell</span></span>
-      <span class="plaza"></span>
-    </div>
-    <div class="hidden">
-      <div class="char animated devotee"></div>
-      <div class="char animated saint"></div>
-      <div class="char animated baal"></div>
-      <div class="char animated marx"></div>
-      <div class="char animated dissident"></div>
-    </div>
-  </div>
-
-  <div class="actions">
-    <div class="title"></div>
-    <div class="options"></div>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript" src="client.js"></script>
