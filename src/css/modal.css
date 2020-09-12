@@ -62,3 +62,9 @@
     color: transparent;
   }
 }
+
+.modal .char {
+	float: left;
+	margin-right: var(--pixel-size);
+	margin-top: calc(-2 * var(--pixel-size));
+}

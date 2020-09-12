@@ -45,7 +45,7 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
               }
             )
             const richestPlayer = sortedArray.pop()
-            const tax = Math.floor(richestPlayer.stats.gold * 0.20)
+            const tax = Math.ceil(richestPlayer.stats.gold * 0.20)
             richestPlayer.stats.gold -= tax
 
             player.nextChoice.target = players.findIndex(player => player === richestPlayer)
@@ -58,7 +58,7 @@ const locationActions: {[name in LocationName]: LocationAction[]} = {
           labels: ['All players -10% 💰'],
           effect (player: Player) {
             players.forEach(player => {
-              const tax = Math.floor(player.stats.gold * 0.10)
+              const tax = Math.ceil(player.stats.gold * 0.10)
               player.stats.gold -= tax
             })
 
