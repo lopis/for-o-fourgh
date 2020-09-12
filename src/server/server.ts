@@ -8,7 +8,13 @@ const PLAZA_LOCATION = 6;
 type ServerGameState = 'lobby' | 'start' | 'end'
 
 function findGame(user: User) {
-  const game = games.find(game => game.state === 'lobby' && game.players.length < PLAYER_NUM) || new Game()
+  let game = games.find(game => game.state === 'lobby' && game.players.length < PLAYER_NUM)
+  if (!game) {
+    console.log('New game created');
+
+    game = new Game()
+    games.push(game)
+  }
   game.join(user)
 }
 
@@ -17,6 +23,7 @@ function removeGame (game: Game) {
 }
 
 function removeUser(user: User) {
+  user.game.players.splice(user.game.players.indexOf(user), 1)
   users.splice(users.indexOf(user), 1);
 }
 
@@ -35,7 +42,7 @@ class Game {
   players: User[]
   bots: User[]
   state: ServerGameState
-  characters = initialChars;
+  characters = [...initialChars];
 
 	constructor() {
     this.players = []
@@ -172,6 +179,7 @@ module.exports = {
 
       if (user.game.players.length >= PLAYER_NUM) {
         user.game.players.forEach(user => user.startGame())
+        user.game.state = 'start'
       }
     });
 
@@ -231,6 +239,7 @@ module.exports = {
 
       game.players.forEach(player => player.updatePlayers())
       game.players.forEach(player => player.startGame())
+      game.state = 'start'
     })
 
 		console.log("Connected: " + socket.id);
