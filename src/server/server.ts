@@ -1,52 +1,30 @@
 "use strict";
 
 let users: User[] = [];
-let bots: User[] = [];
+let games: Game[] = [];
 const initialChars = ["saint", "baal", "marx", "dissident", "devotee"];
-let characters = initialChars;
-let PLAYER_NUM = 5;
+const PLAYER_NUM = 5;
 const PLAZA_LOCATION = 6;
+type ServerGameState = 'lobby' | 'start' | 'end'
 
-function removePlayer(user: User) {
+function findGame(user: User) {
+  let game = games.find(game => game.state === 'lobby' && game.players.length < PLAYER_NUM)
+  if (!game) {
+    console.log('New game created');
+
+    game = new Game()
+    games.push(game)
+  }
+  game.join(user)
+}
+
+function removeGame (game: Game) {
+  games.splice(games.indexOf(game), 1);
+}
+
+function removeUser(user: User) {
+  user.game.players.splice(user.game.players.indexOf(user), 1)
   users.splice(users.indexOf(user), 1);
-}
-
-function getChar () {
-  const randomIndex = Math.round(Math.random() * (characters.length - 1))
-  const char = characters[randomIndex]
-  characters.splice(randomIndex, 1);
-
-  return char;
-}
-
-function joinBotPlayer () {
-  const bot = new User(null, 'Bot' + (bots.length + 1));
-  users.push(bot);
-  bots.push(bot);
-  bot.name = bot.id;
-  bot.isBot = true;
-  console.log(`${bot.name} joined as ${bot.char} (characters: ${JSON.stringify(characters)}).`);
-}
-
-function removeBots () {
-  bots.forEach(bot => {
-    console.log('Bot left the game');
-    removePlayer(bot);
-    characters.push(bot.char);
-    bots.splice(bots.indexOf(bot), 1);
-  })
-}
-
-function setBotLocation () {
-  bots.forEach(bot => {
-    bot.location = bot.nextChoice.location || bot.location
-  })
-}
-
-function resetBotChoice () {
-  bots.forEach(bot => {
-    bot.nextChoice = {}
-  })
 }
 
 // TODO: use digits instead of strings to represent actions
@@ -56,46 +34,77 @@ function getRandom (max: number) {
   return Math.round(Math.random() * max)
 }
 
-function getRandomPlayer (except: User): number {
-  let rnd = getRandom(users.length - 1)
-  if (users[rnd] === except) {
-    return getRandomPlayer(except)
-  }
-
-  return rnd
-}
-
-function playBotAction () {
-  bots.forEach(bot => {
-    bot.nextChoice = {
-      action: getRandom(100),
-      option: getRandom(100),
-      target: getRandomPlayer(bot)
-    }
-    console.log(`Bot performs action ${bot.nextChoice.action}/${bot.nextChoice.option}/${bot.nextChoice.target}`);
-  })
-}
-
-function playBotLocation () {
-  bots.forEach(bot => {
-    bot.nextChoice = {location: getRandom(locationsCount - 1) + 1}
-    console.log(`Bot goes to ${bot.nextChoice.location}`);
-  })
-}
-
 /**
  * Game class
  */
 class Game {
 
-  users: User[]
+  players: User[]
+  bots: User[]
+  state: ServerGameState
+  characters = [...initialChars];
 
-	/**
-	 * @param {User[]} users
-	 */
-	constructor(users: User[]) {
-		this.users = users
-	}
+	constructor() {
+    this.players = []
+    this.bots = []
+    this.state = 'lobby'
+  }
+
+  join (user: User) {
+    this.players.push(user)
+    user.game = this
+    user.assignChar()
+  }
+
+  joinBot () {
+    const bot = new User(null, 'Bot' + (this.bots.length + 1));
+    this.players.push(bot);
+    this.bots.push(bot);
+    bot.name = bot.id;
+    bot.isBot = true;
+    bot.game = this
+    bot.assignChar();
+    console.log(`${bot.name} joined as ${bot.char}.`);
+  }
+
+  setBotsLocation () {
+    this.bots.forEach(bot => {
+      bot.location = bot.nextChoice.location || bot.location
+    })
+  }
+
+  resetBotChoice () {
+    this.bots.forEach(bot => {
+      bot.nextChoice = {}
+    })
+  }
+
+  playBotsAction () {
+    this.bots.forEach(bot => {
+      bot.nextChoice = {
+        action: getRandom(100),
+        option: getRandom(100),
+        target: this.getRandomPlayer(bot)
+      }
+      console.log(`Bot performs action ${bot.nextChoice.action}/${bot.nextChoice.option}/${bot.nextChoice.target}`);
+    })
+  }
+
+  playBotsLocation () {
+    this.bots.forEach(bot => {
+      bot.nextChoice = {location: getRandom(locationsCount - 1) + 1}
+      console.log(`Bot goes to ${bot.nextChoice.location}`);
+    })
+  }
+
+  getRandomPlayer (except: User): number {
+    let rnd = getRandom(this.players.length - 1)
+    if (this.players[rnd] === except) {
+      return this.getRandomPlayer(except)
+    }
+
+    return rnd
+  }
 }
 
 /**
@@ -115,12 +124,11 @@ class User {
 	constructor(socket: SocketIO.Socket, id?: string) {
 		this.socket = socket;
     this.id = id ? id : socket.id
-    this.char = getChar()
 	}
 
-	updateUsers() {
+	updatePlayers() {
     if (this.socket) {
-      this.socket.emit('updateUsers', users.map(
+      this.socket.emit('updateUsers', this.game.players.map(
         ({name, char, location, nextChoice = {}, id}) => ({
           name, char, location, nextChoice, id
         })
@@ -132,6 +140,12 @@ class User {
     if (this.socket) {
       this.socket.emit('start');
     }
+  }
+
+  assignChar () {
+    const randomIndex = Math.round(Math.random() * (this.game.characters.length - 1))
+    this.char = this.game.characters[randomIndex]
+    this.game.characters.splice(randomIndex, 1);
   }
 }
 
@@ -157,87 +171,92 @@ module.exports = {
 
 		socket.on("join", (name: string) => {
       user.name = name.substr(0, 7);
+      findGame(user);
+
 			console.log(`Player ${socket.id} is called ${user.name} and is ${user.char}`);
 
-      users.forEach(user => user.updateUsers())
+      user.game.players.forEach(user => user.updatePlayers())
 
-      if (users.length >= PLAYER_NUM) {
-        users.forEach(user => user.startGame())
+      if (user.game.players.length >= PLAYER_NUM) {
+        user.game.players.forEach(user => user.startGame())
+        user.game.state = 'start'
       }
     });
 
 		socket.on("disconnect", () => {
       console.log("Disconnected: " + socket.id);
-      removePlayer(user);
-      characters.push(user.char);
-      if (users.every(user => user.isBot)) {
-        users = []
-        removeBots()
-        bots = []
+      const game = user.game
+      removeUser(user);
+      if (game) {
+        game.characters.push(user.char);
+        if (game.players.every(player => player.isBot)) {
+          removeGame(game)
+        } else {
+          game.players.forEach(user => user.updatePlayers())
+        }
       }
-      users.forEach(user => user.updateUsers())
     });
 
 		socket.on("choice", (choice) => {
       const {location, action, option, target} = sanitizeChoice(choice);
+      const game = user.game
+
       if (Number.isInteger(location)) {
         console.log(`Player ${user.name} goes to ${location}`);
-        playBotLocation();
+        game.playBotsLocation();
       } else {
         console.log(`Player ${user.name} performs action ${action}/${option}/${target}`);
-        playBotAction();
+        game.playBotsAction();
       }
 
       user.nextChoice = choice
-      if (users.every(user => Number.isInteger(user.nextChoice.location)) || users.every(user => Number.isInteger(user.nextChoice.action))) {
-        users.forEach(user => user.updateUsers())
+      if (game.players.every(player => Number.isInteger(player.nextChoice.location)) || game.players.every(player => Number.isInteger(player.nextChoice.action))) {
+        game.players.forEach(player => player.updatePlayers())
       }
     });
 
     socket.on("move", () => {
+      const game = user.game
       if (user.nextChoice.location) {
         user.location = user.nextChoice.location
         user.nextChoice.location = null
       }
-      setBotLocation();
+      game.setBotsLocation();
     });
 
     socket.on("resetChoice", () => {
       user.nextChoice = {}
-      resetBotChoice();
+      user.game.resetBotChoice();
     });
 
     socket.on("forceStart", () => {
-      const botCount = PLAYER_NUM - users.length
+      const game = user.game
+      const botCount = PLAYER_NUM - game.players.length
       for (let index = botCount; index > 0; index--) {
-        joinBotPlayer();
+        game.joinBot();
       }
-      console.log(`${users.length} players, ${bots.length} of which are bots, start the game.`);
+      console.log(`${game.players.length} players, ${game.bots.length} of which are bots, start the game.`);
 
-      users.forEach(user => user.updateUsers())
-      users.forEach(user => user.startGame())
+      game.players.forEach(player => player.updatePlayers())
+      game.players.forEach(player => player.startGame())
+      game.state = 'start'
     })
 
 		console.log("Connected: " + socket.id);
   },
 
 	'stats': (req: any, res: any ) => {
-    res.json({
-      players: users.map(({isBot, id, nextChoice, name, char, location}) => ({
+    res.json(games.map(game => ({
+      players: game.players.map(({isBot, id, nextChoice, name, char, location}) => ({
         name,
         char,
         id,
         nextChoice,
         location,
       })),
-      bots: bots.map(({isBot, id, nextChoice, name, char, location}) => ({
-        name,
-        char,
-        id,
-        nextChoice,
-        location,
-      }))
-    });
+      bots: game.bots.map(({name}) => name),
+      characters: game.characters
+    })));
 	},
 
 };
