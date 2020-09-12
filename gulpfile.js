@@ -59,11 +59,11 @@ gulp.task('build-js-dev', (done) => {
 gulp.task('build-js', (done) => {
 	return gulp.src('./tmp/client/*.js')
 	.pipe(concat('client.js'))
-	.pipe(uglify({
-    mangle: {
-      toplevel: true
-    },
-  }))
+	// .pipe(uglify({
+  //   mangle: {
+  //     toplevel: true
+  //   },
+  // }))
 	.pipe(gulp.dest('./public/'));
 });
 
